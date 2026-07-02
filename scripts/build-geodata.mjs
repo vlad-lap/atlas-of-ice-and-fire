@@ -1,0 +1,89 @@
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import {
+    CONTINENT_KEY,
+    DISPLAYED_CONTINENT,
+    EXTRA_LOCATIONS,
+    GREAT_CASTLES,
+} from './constants.mjs';
+import { locationsInContinent } from './locations-in-continent.mjs';
+import { splitByType } from './split-by-type.mjs';
+import { filterGeodata } from './filter-geodata.mjs';
+import { generateIds } from './generate-ids.mjs';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const VENDORS = join(__dirname, '..', 'vendors');
+const GEODATA = join(__dirname, '..', 'geodata');
+
+function readGeoJSON(fileName) {
+    return JSON.parse(readFileSync(join(VENDORS, fileName), 'utf8'));
+}
+
+function writeGeoJSON(fileName, data) {
+    const dataWithIds = generateIds(data);
+    writeFileSync(join(GEODATA, fileName), JSON.stringify(dataWithIds, null, 2));
+    console.log(`${fileName}: ${dataWithIds.features.length} features`);
+}
+
+function processGeoJSON(fileName, filterFn) {
+    const raw = readGeoJSON(fileName);
+    const filtered = filterFn ? filterGeodata(raw, filterFn) : raw;
+    const processed = generateIds(filtered);
+    writeGeoJSON(fileName, processed);
+    return processed;
+}
+
+function splitAndWrite(geodata, category) {
+    const byType = splitByType(geodata);
+
+    for (const [type, collection] of Object.entries(byType)) {
+        if (type === 'Castle') {
+            const greatCastles = filterGeodata(collection, f =>
+                GREAT_CASTLES.includes(f.properties.name),
+            );
+
+            const otherCastles = filterGeodata(
+                collection,
+                f => !GREAT_CASTLES.includes(f.properties.name),
+            );
+
+            writeGeoJSON(`got_${category}_great_castle.geojson`, greatCastles);
+            writeGeoJSON(`got_${category}_castle.geojson`, otherCastles);
+        } else {
+            writeGeoJSON(`got_${category}_${type.toLowerCase()}.geojson`, collection);
+        }
+    }
+}
+
+mkdirSync(GEODATA, { recursive: true });
+
+const filterDisplayedContinent = key => feature =>
+    feature.properties[key ?? CONTINENT_KEY] === DISPLAYED_CONTINENT;
+
+const filteredContinents = processGeoJSON(
+    'got_continents.geojson',
+    filterDisplayedContinent('name'),
+);
+const filteredIslands = processGeoJSON('got_islands.geojson', filterDisplayedContinent());
+
+['got_lakes.geojson', 'got_rivers.geojson', 'got_roads.geojson'].forEach(fileName =>
+    processGeoJSON(fileName, filterDisplayedContinent()),
+);
+
+['got_political.geojson', 'got_wall.geojson'].forEach(fileName => processGeoJSON(fileName));
+
+const locations = readGeoJSON('got_locations.geojson');
+const filteredLocations = locationsInContinent(locations, filteredContinents, filteredIslands);
+const locationsWithExtras = {
+    ...filteredLocations,
+    features: [...filteredLocations.features, ...EXTRA_LOCATIONS],
+};
+console.log(`${DISPLAYED_CONTINENT} locations: ${locationsWithExtras.features.length} features`);
+
+splitAndWrite(locationsWithExtras, 'locations');
+
+const landscape = readGeoJSON('got_landscape.geojson');
+const filteredLandscape = filterGeodata(landscape, filterDisplayedContinent());
+
+splitAndWrite(filteredLandscape, 'landscape');

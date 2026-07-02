@@ -1,0 +1,10 @@
+@if (loading()) {
+    <div class="loader">
+        <mat-progress-spinner
+            mode="indeterminate"
+            [diameter]="48"
+        />
+    </div>
+} @else {
+    <router-outlet />
+}
