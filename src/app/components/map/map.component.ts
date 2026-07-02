@@ -6,7 +6,6 @@ import {
     NgZone,
     OnDestroy,
     PLATFORM_ID,
-    signal,
     viewChild,
 } from '@angular/core';
 import {
@@ -16,6 +15,7 @@ import {
     ILabelSettings,
     Label,
     p50,
+    percent,
     Rectangle,
     Root,
 } from '@amcharts/amcharts5';
@@ -60,6 +60,7 @@ import {
     LOCATION_RADIUS,
     MOUNTAINS_COLORS,
     MOUNTAINS_LABEL_COLOR,
+    POINT_HIT_AREA_RADIUS,
     ROADS_COLOR,
     ROADS_LABEL_COLOR,
     WATER_COLOR,
@@ -104,6 +105,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     private root: Root;
     private northBoundRafId: number;
+    private hasHover: boolean = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
     constructor(
         // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
@@ -174,7 +176,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
             }),
         );
 
-        const zoomControl = this.map.set('zoomControl', ZoomControl.new(this.root, {}));
+        const zoomControl = this.map.set(
+            'zoomControl',
+            ZoomControl.new(this.root, {
+                y: percent(95),
+                layer: 10,
+            }),
+        );
         zoomControl.homeButton.set('visible', true);
 
         this.map.chartContainer.set(
@@ -425,12 +433,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
                 fill: color(LOCATION_COLORS[type]),
                 stroke: color(BLACK_COLOR),
                 strokeWidth: 1,
-                interactive: true,
-                tooltipText: `{name}\n[fontSize: ${FontSize.Small}px]{type}[/]`,
                 ...bulletOverrides,
             });
-
-            circle.states.create('hover', { scale: 1.2 });
 
             return Bullet.new(this.root, { sprite: circle });
         });
@@ -448,6 +452,24 @@ export class MapComponent implements AfterViewInit, OnDestroy {
             });
         }
 
+        // Extended hit area for touch screens
+        series.bullets.push((_root, _series, dataItem) => {
+            const { type } = dataItem.dataContext as LocationData;
+
+            const hitArea = Circle.new(this.root, {
+                radius: POINT_HIT_AREA_RADIUS,
+                layer: 3,
+                fill: color(LOCATION_COLORS[type]),
+                fillOpacity: 0,
+                strokeOpacity: 0,
+                interactive: true,
+                tooltipText: `{name}\n[fontSize: ${FontSize.Small}px]{type}[/]`,
+                showTooltipOn: this.hasHover ? 'hover' : 'click',
+            });
+
+            return Bullet.new(this.root, { sprite: hitArea });
+        });
+
         return series;
     }
 
@@ -455,8 +477,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         series: MapPolygonSeries,
         hoverState: Partial<IMapPolygonSettings>,
     ): void {
-        const hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-        if (hasHover) {
+        if (this.hasHover) {
             series.mapPolygons.template.setAll({ interactive: true });
             series.mapPolygons.template.states.create('hover', hoverState);
         }

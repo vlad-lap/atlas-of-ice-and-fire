@@ -37,6 +37,8 @@ export const LOCATION_RADIUS: Record<number, number> = {
     5: 7,
 };
 
+export const POINT_HIT_AREA_RADIUS = 20;
+
 export const LOCATION_COLORS: Record<string, string> = {
     City: '#ffa80d',
     Town: '#ffa80d',
