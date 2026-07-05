@@ -12,7 +12,8 @@
             "schematics": {
                 "@schematics/angular:component": {
                     "prefix": "aif",
-                    "style": "scss"
+                    "style": "scss",
+                    "changeDetection": "OnPush"
                 }
             },
             "root": "",

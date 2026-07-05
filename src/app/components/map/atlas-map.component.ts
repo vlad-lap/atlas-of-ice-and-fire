@@ -27,13 +27,22 @@ import {
     POINTS_PAINT,
     POLYGONS_PAINT,
 } from './configs';
-import { MatMiniFabButton } from '@angular/material/button';
+import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { AboutDialogComponent } from '../about-dialog/about-dialog.component';
 
 @Component({
     selector: 'aif-atlas-map',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [MapComponent, GeoJSONSourceComponent, LayerComponent, MatMiniFabButton, MatIcon],
+    imports: [
+        MapComponent,
+        GeoJSONSourceComponent,
+        LayerComponent,
+        MatMiniFabButton,
+        MatIcon,
+        MatIconButton,
+    ],
     templateUrl: './atlas-map.component.html',
     styleUrl: './atlas-map.component.scss',
 })
@@ -60,7 +69,10 @@ export class AtlasMapComponent {
     private readonly hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     private popup: Popup;
 
-    constructor(private store: Store) {}
+    constructor(
+        private store: Store,
+        private dialog: MatDialog,
+    ) {}
 
     onHomeClick(): void {
         this.map().mapInstance.flyTo({ center: INITIAL_MAP_CENTER, zoom: ZoomLevel.Low });
@@ -103,6 +115,10 @@ export class AtlasMapComponent {
         }
 
         this.showPointTooltip(target, feature);
+    }
+
+    openAboutDialog(): void {
+        this.dialog.open(AboutDialogComponent);
     }
 
     private showPointTooltip(

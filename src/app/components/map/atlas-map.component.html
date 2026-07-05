@@ -1,6 +1,15 @@
 <button
+    matIconButton
+    class="about-button"
+    title="About this project"
+    aria-label="About this project"
+    (click)="openAboutDialog()"
+>
+    <mat-icon>info_i</mat-icon>
+</button>
+
+<button
     matMiniFab
-    type="button"
     class="home-button"
     aria-label="Reset map view"
     (click)="onHomeClick()"
