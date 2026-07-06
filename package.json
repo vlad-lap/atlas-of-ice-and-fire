@@ -5,9 +5,11 @@
         "ng": "ng",
         "build-geodata": "node scripts/build-geodata.mjs",
         "start": "npm run build-geodata && ng serve",
+        "start:broadcast": "npm run build-geodata && ng serve --host=0.0.0.0",
         "build": "npm run build-geodata && ng build",
         "watch": "npm run build-geodata && ng build --watch --configuration development",
-        "test": "ng test"
+        "test": "ng test",
+        "lint": "ng lint"
     },
     "private": true,
     "packageManager": "npm@10.9.0",
@@ -21,9 +23,11 @@
         "@angular/material": "^21.2.14",
         "@angular/platform-browser": "^21.2.0",
         "@angular/router": "^21.2.0",
+        "@maplibre/ngx-maplibre-gl": "21.0.2",
         "@ngxs/store": "^21.0.0",
         "@types/lodash": "^4.17.24",
         "lodash": "^4.18.1",
+        "maplibre-gl": "5.24.0",
         "rxjs": "~7.8.0",
         "tslib": "^2.3.0"
     },
@@ -31,9 +35,13 @@
         "@angular/build": "^21.2.15",
         "@angular/cli": "^21.2.15",
         "@angular/compiler-cli": "^21.2.0",
+        "@eslint/js": "^10.0.1",
+        "angular-eslint": "21.4.0",
+        "eslint": "^10.3.0",
         "jsdom": "^28.0.0",
         "prettier": "^3.8.1",
         "typescript": "~5.9.2",
+        "typescript-eslint": "8.59.2",
         "vitest": "^4.0.8"
     }
 }

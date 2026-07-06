@@ -1,5 +1,6 @@
 import {
     AfterViewInit,
+    ChangeDetectionStrategy,
     Component,
     ElementRef,
     Inject,
@@ -70,11 +71,12 @@ import {
 import { getCentralPoint, getLabelAngle } from '../../utils';
 
 @Component({
-    selector: 'aif-map',
-    templateUrl: './map.component.html',
-    styleUrl: './map.component.scss',
+    selector: 'aif-atlas-map-legacy',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    templateUrl: './atlas-map-legacy.component.html',
+    styleUrl: './atlas-map-legacy.component.scss',
 })
-export class MapComponent implements AfterViewInit, OnDestroy {
+export class AtlasMapLegacyComponent implements AfterViewInit, OnDestroy {
     mapElRef = viewChild('map', { read: ElementRef });
 
     map: MapChart;
@@ -88,7 +90,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         lakes: null,
     };
 
-    lineSeries: LineGeodataDict<MapLineSeries> = {
+    lineSeries: Partial<LineGeodataDict<MapLineSeries>> = {
         rivers: null,
         roads: null,
         wall: null,

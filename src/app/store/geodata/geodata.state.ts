@@ -1,11 +1,14 @@
-import { FeatureCollection } from 'geojson';
-import { Action, createSelector, Selector, State, StateContext } from '@ngxs/store';
+import { FeatureCollection, Feature, Point } from 'geojson';
+import { Action, createSelector, State, StateContext } from '@ngxs/store';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { GetGeodata } from './geodata.actions';
 import { Observable, tap } from 'rxjs';
 import { GEODATA_URLS } from '../../constants';
-import { GeodataStateModel } from '../../models';
+import { Geometry, GeodataStateModel } from '../../models';
+import { getCentralPoint } from '../../utils';
+
+const EMPTY: FeatureCollection<Point> = { type: 'FeatureCollection', features: [] };
 
 @State<GeodataStateModel>({
     name: 'geodata',
@@ -17,6 +20,30 @@ export class GeodataState {
         return createSelector(
             [GeodataState],
             (state: GeodataStateModel): FeatureCollection => state[key],
+        );
+    }
+
+    static labelPoints(key: keyof GeodataStateModel) {
+        return createSelector(
+            [GeodataState],
+            (state: GeodataStateModel): FeatureCollection<Point> => {
+                const collection = state[key];
+                if (!collection) {
+                    return EMPTY;
+                }
+
+                const features: Feature<Point>[] = collection.features
+                    .filter(feature => feature.properties?.name)
+                    .map(feature => ({
+                        ...feature,
+                        geometry: {
+                            type: 'Point',
+                            coordinates: getCentralPoint(feature.geometry as Geometry),
+                        },
+                    }));
+
+                return { ...collection, features };
+            },
         );
     }
 

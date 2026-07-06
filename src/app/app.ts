@@ -7,7 +7,7 @@ import {
     Router,
     RouterOutlet,
 } from '@angular/router';
-import { delay, filter } from 'rxjs';
+import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
