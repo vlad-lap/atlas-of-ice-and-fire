@@ -14,3 +14,19 @@ The original dataset is licensed under the **Creative Commons Attribution–NonC
 
 - Source: https://github.com/mapbox/GOT-Inspired-Map
 - License: https://creativecommons.org/licenses/by-nc-sa/3.0/
+
+## Tech Stack
+
+- **Angular 21** — standalone components, signals, lazy-loaded routes
+- **MapLibre GL** (`maplibre-gl` + `@maplibre/ngx-maplibre-gl`) — WebGL map renderer
+- **NGXS** — GeoJSON data store
+- **Angular Material** — UI components
+
+## Development
+
+```bash
+npm start        # build geodata + serve
+npm run build    # build geodata + production build
+```
+
+Geodata is preprocessed from `vendors/` into `geodata/` by `scripts/build-geodata.mjs` before every serve/build.

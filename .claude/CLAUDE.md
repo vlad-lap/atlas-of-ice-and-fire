@@ -3,7 +3,6 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## TypeScript Best Practices
 
-- Use strict type checking
 - Prefer type inference when the type is obvious
 - Avoid the `any` type; use `unknown` when type is uncertain
 
@@ -54,3 +53,23 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Use the `providedIn: 'root'` option for singleton services
 - Use constructor injection instead of `inject()` function inside classes
 - Use the `inject()` function instead of constructor injection inside functions
+
+## Geodata Build Pipeline
+
+- Raw source data lives in `vendors/`, processed output goes to `geodata/`
+- `scripts/build-geodata.mjs` runs before every serve/build (`npm start` / `npm run build`)
+- To regenerate manually: `npm run build-geodata`
+- `got_political_borders.geojson` is derived at build time: kingdom polygon segments where both endpoints are coastline vertices (shared with continents/islands) are dropped, leaving only land-land political borders
+
+## Map Architecture
+
+- The `map` route (`/map`) renders `AtlasMapComponent` via MapLibre GL — this is the current map
+- The `map-legacy` route (`/map-legacy`) renders `AtlasMapLegacyComponent` via amCharts 5 — kept until the MapLibre map is a verified full replacement
+- `@maplibre/ngx-maplibre-gl` exports a `MapComponent` that collides with the legacy component name; import it aliased: `import { MapComponent as MglMap } from '@maplibre/ngx-maplibre-gl'`
+- All geodata URLs are in `src/app/constants.ts` (`GEODATA_URLS`); sources and layers are declared in the template; paint/layout configs live in `src/app/components/map/configs.ts`
+
+## Geodata State
+
+- GeoJSON data is loaded by `mapResolver` (attached to both map routes) before the route activates; it dispatches `GetGeodata` for each key into `GeodataState`
+- Read data in components with `store.selectSignal(GeodataState.geodata('key'))` or `store.selectSignal(GeodataState.labelPoints('key'))` — do not fetch with `HttpClient` directly in map components
+- Kingdom labels use a derived centroid-point source (`kingdomsLabelPoints`) computed via `computed()` over `getCentralPoint` from `src/app/utils/geometry.ts`; rendered from a separate `kingdoms-label-points` GeoJSON source to prevent duplicate labels across MapLibre internal tiles
