@@ -25,6 +25,8 @@
     [minZoom]="1"
     [maxZoom]="9"
     [maxBounds]="maxBounds"
+    [dragRotate]="false"
+    (mapLoad)="onMapLoad($event)"
     (mapClick)="onMapClick($event)"
 >
     <mgl-geojson-source
@@ -80,6 +82,17 @@
         type="fill"
         source="islands"
         [paint]="polygonsPaint.islands"
+    />
+
+    <mgl-geojson-source
+        id="kingdom-borders"
+        [data]="geodataUrls.kingdomBorders"
+    />
+    <mgl-layer
+        id="kingdom-borders-line"
+        type="line"
+        source="kingdom-borders"
+        [paint]="linesPaint.kingdomBorders"
     />
 
     <mgl-geojson-source
@@ -308,5 +321,17 @@
         [minzoom]="ZoomLevel.High"
         (layerMouseEnter)="onPointEnter($event)"
         (layerMouseLeave)="onPointLeave()"
+    />
+
+    <mgl-image-source
+        id="north-gradient"
+        [url]="northGradientUrl"
+        [coordinates]="northGradientCoordinates"
+    />
+    <mgl-layer
+        id="north-gradient-layer"
+        type="raster"
+        source="north-gradient"
+        [paint]="northGradientPaint"
     />
 </mgl-map>

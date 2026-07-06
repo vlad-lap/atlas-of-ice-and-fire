@@ -5,6 +5,7 @@
         "ng": "ng",
         "build-geodata": "node scripts/build-geodata.mjs",
         "start": "npm run build-geodata && ng serve",
+        "start:broadcast": "npm run build-geodata && ng serve --host=0.0.0.0",
         "build": "npm run build-geodata && ng build",
         "watch": "npm run build-geodata && ng build --watch --configuration development",
         "test": "ng test",

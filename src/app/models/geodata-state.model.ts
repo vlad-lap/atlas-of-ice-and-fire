@@ -8,6 +8,7 @@ export interface GeodataStateModel {
     forests?: FeatureCollection;
     lakes?: FeatureCollection;
     rivers?: FeatureCollection;
+    kingdomBorders?: FeatureCollection;
     roads?: FeatureCollection;
     wall?: FeatureCollection;
     cities?: FeatureCollection;
@@ -25,7 +26,10 @@ export type PolygonGeodataDict<T> = Pick<
     'continents' | 'kingdoms' | 'islands' | 'mountains' | 'forests' | 'lakes'
 >;
 
-export type LineGeodataDict<T> = Pick<GeodataDict<T>, 'rivers' | 'roads' | 'wall'>;
+export type LineGeodataDict<T> = Pick<
+    GeodataDict<T>,
+    'rivers' | 'roads' | 'wall' | 'kingdomBorders'
+>;
 
 export type PointGeodataDict<T> = Pick<
     GeodataDict<T>,

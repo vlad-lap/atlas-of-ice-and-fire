@@ -1,8 +1,20 @@
-import { ChangeDetectionStrategy, Component, viewChild } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    ComponentRef,
+    ViewContainerRef,
+    viewChild,
+} from '@angular/core';
 import { Store } from '@ngxs/store';
-import { GeoJSONSourceComponent, LayerComponent, MapComponent } from '@maplibre/ngx-maplibre-gl';
+import {
+    GeoJSONSourceComponent,
+    ImageSourceComponent,
+    LayerComponent,
+    MapComponent,
+} from '@maplibre/ngx-maplibre-gl';
 import {
     LngLatLike,
+    Map,
     MapGeoJSONFeature,
     MapLayerMouseEvent,
     MapMouseEvent,
@@ -24,6 +36,8 @@ import {
     LINES_PAINT,
     MAP_BOUNDS,
     MAP_STYLE,
+    NORTH_GRADIENT_COORDINATES,
+    NORTH_GRADIENT_PAINT,
     POINTS_PAINT,
     POLYGONS_PAINT,
 } from './configs';
@@ -31,6 +45,7 @@ import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { AboutDialogComponent } from '../about-dialog/about-dialog.component';
+import { MapTooltipComponent } from '../map-tooltip/map-tooltip.component';
 
 @Component({
     selector: 'aif-atlas-map',
@@ -38,6 +53,7 @@ import { AboutDialogComponent } from '../about-dialog/about-dialog.component';
     imports: [
         MapComponent,
         GeoJSONSourceComponent,
+        ImageSourceComponent,
         LayerComponent,
         MatMiniFabButton,
         MatIcon,
@@ -66,13 +82,23 @@ export class AtlasMapComponent {
     protected readonly labelLayout = LABEL_LAYOUT;
     protected readonly labelPaint = LABEL_PAINT;
 
+    protected readonly northGradientUrl = this.buildNorthGradientUrl();
+    protected readonly northGradientCoordinates = NORTH_GRADIENT_COORDINATES;
+    protected readonly northGradientPaint = NORTH_GRADIENT_PAINT;
+
     private readonly hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     private popup: Popup;
+    private tooltipRef: ComponentRef<MapTooltipComponent>;
 
     constructor(
         private store: Store,
         private dialog: MatDialog,
+        private viewContainerRef: ViewContainerRef,
     ) {}
+
+    onMapLoad(map: Map): void {
+        map.touchZoomRotate.disableRotation();
+    }
 
     onHomeClick(): void {
         this.map().mapInstance.flyTo({ center: INITIAL_MAP_CENTER, zoom: ZoomLevel.Low });
@@ -84,7 +110,7 @@ export class AtlasMapComponent {
         }
 
         const feature = features?.[0];
-        if (!feature?.properties) {
+        if (!feature?.properties?.name) {
             return;
         }
 
@@ -94,6 +120,8 @@ export class AtlasMapComponent {
     onPointLeave(): void {
         this.popup?.remove();
         this.popup = null;
+        this.tooltipRef?.destroy();
+        this.tooltipRef = null;
     }
 
     onMapClick({ target, point: { x, y } }: MapMouseEvent): void {
@@ -109,7 +137,7 @@ export class AtlasMapComponent {
             { layers: POINT_CIRCLE_LAYER_IDS },
         );
 
-        if (!feature?.properties) {
+        if (!feature?.properties?.name) {
             this.onPointLeave();
             return;
         }
@@ -128,24 +156,30 @@ export class AtlasMapComponent {
         const lngLat = (geometry as Point).coordinates as LngLatLike;
 
         this.popup?.remove();
+        this.tooltipRef?.destroy();
         this.popup = new Popup({ closeButton: false, closeOnClick: false })
             .setLngLat(lngLat)
             .setDOMContent(this.buildPointTooltip(properties as LocationData))
             .addTo(map);
     }
 
-    private buildPointTooltip({ name, type }: LocationData): HTMLElement {
-        const container = document.createElement('div');
+    private buildNorthGradientUrl(): string {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d')!;
+        const gradient = ctx.createLinearGradient(0, 0, 0, 256);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.75)');
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1, 256);
+        return canvas.toDataURL();
+    }
 
-        const nameEl = document.createElement('div');
-        nameEl.textContent = name;
-        container.appendChild(nameEl);
-
-        const typeEl = document.createElement('div');
-        typeEl.textContent = type;
-        typeEl.style.fontSize = '0.85em';
-        container.appendChild(typeEl);
-
-        return container;
+    private buildPointTooltip(location: LocationData): HTMLElement {
+        this.tooltipRef = this.viewContainerRef.createComponent(MapTooltipComponent);
+        this.tooltipRef.setInput('location', location);
+        this.tooltipRef.changeDetectorRef.detectChanges();
+        return this.tooltipRef.location.nativeElement;
     }
 }

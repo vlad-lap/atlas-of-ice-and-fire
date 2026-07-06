@@ -8,6 +8,7 @@ export const GEODATA_URLS: GeodataDict<string> = {
     forests: 'geodata/got_landscape_forest.geojson',
     lakes: 'geodata/got_lakes.geojson',
     rivers: 'geodata/got_rivers.geojson',
+    kingdomBorders: 'geodata/got_political_borders.geojson',
     roads: 'geodata/got_roads.geojson',
     wall: 'geodata/got_wall.geojson',
     cities: 'geodata/got_locations_city.geojson',

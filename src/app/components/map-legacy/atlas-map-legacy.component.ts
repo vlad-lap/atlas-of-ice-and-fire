@@ -90,7 +90,7 @@ export class AtlasMapLegacyComponent implements AfterViewInit, OnDestroy {
         lakes: null,
     };
 
-    lineSeries: LineGeodataDict<MapLineSeries> = {
+    lineSeries: Partial<LineGeodataDict<MapLineSeries>> = {
         rivers: null,
         roads: null,
         wall: null,

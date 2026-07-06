@@ -1,8 +1,10 @@
 import {
     CircleLayerSpecification,
     FillLayerSpecification,
+    ImageSourceSpecification,
     LineLayerSpecification,
     LngLatBoundsLike,
+    RasterLayerSpecification,
     StyleSpecification,
     SymbolLayerSpecification,
 } from 'maplibre-gl';
@@ -38,6 +40,17 @@ export const MAP_BOUNDS: LngLatBoundsLike = [
     [MapBounds.East, MapBounds.North],
 ];
 
+export const NORTH_GRADIENT_COORDINATES: ImageSourceSpecification['coordinates'] = [
+    [MapBounds.West, MapBounds.North],
+    [MapBounds.East, MapBounds.North],
+    [MapBounds.East, MapBounds.North - 4],
+    [MapBounds.West, MapBounds.North - 4],
+];
+
+export const NORTH_GRADIENT_PAINT: RasterLayerSpecification['paint'] = {
+    'raster-fade-duration': 0,
+};
+
 export const POLYGONS_PAINT: Partial<PolygonGeodataDict<FillLayerSpecification['paint']>> = {
     continents: {
         'fill-color': LandscapeColor.Land,
@@ -67,6 +80,11 @@ export const LINES_PAINT: Partial<LineGeodataDict<LineLayerSpecification['paint'
     wall: {
         'line-color': LandscapeColor.Wall,
         'line-width': 3,
+    },
+    kingdomBorders: {
+        'line-color': LandscapeColor.KingdomBorder,
+        'line-dasharray': [4, 4],
+        'line-opacity': 0.6,
     },
 };
 
@@ -196,7 +214,7 @@ export const LABEL_PAINT: Partial<GeodataDict<SymbolLayerSpecification['paint']>
     forests: DEFAULT_LAND_LABEL_PAINT,
     lakes: DEFAULT_WATER_LABEL_PAINT,
     islands: DEFAULT_LAND_LABEL_PAINT,
-    kingdoms: DEFAULT_LAND_LABEL_PAINT,
+    kingdoms: { 'text-color': LabelColor.Kingdom },
     rivers: DEFAULT_WATER_LABEL_PAINT,
     roads: { 'text-color': LabelColor.Road },
     wall: { 'text-color': LabelColor.Wall },

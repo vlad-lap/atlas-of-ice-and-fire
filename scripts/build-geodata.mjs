@@ -11,6 +11,7 @@ import { locationsInContinent } from './locations-in-continent.mjs';
 import { splitByType } from './split-by-type.mjs';
 import { filterGeodata } from './filter-geodata.mjs';
 import { generateIds } from './generate-ids.mjs';
+import { buildKingdomBorders } from './build-kingdom-borders.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const VENDORS = join(__dirname, '..', 'vendors');
@@ -66,12 +67,17 @@ const filteredContinents = processGeoJSON(
     filterDisplayedContinent('name'),
 );
 const filteredIslands = processGeoJSON('got_islands.geojson', filterDisplayedContinent());
+const kingdoms = processGeoJSON('got_political.geojson');
 
 ['got_lakes.geojson', 'got_rivers.geojson', 'got_roads.geojson'].forEach(fileName =>
     processGeoJSON(fileName, filterDisplayedContinent()),
 );
 
-['got_political.geojson', 'got_wall.geojson'].forEach(fileName => processGeoJSON(fileName));
+processGeoJSON('got_wall.geojson');
+
+const borders = buildKingdomBorders(kingdoms, filteredContinents, filteredIslands);
+
+writeGeoJSON('got_political_borders.geojson', borders);
 
 const locations = readGeoJSON('got_locations.geojson');
 const filteredLocations = locationsInContinent(locations, filteredContinents, filteredIslands);

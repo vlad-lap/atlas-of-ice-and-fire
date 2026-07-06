@@ -26,6 +26,7 @@ export enum LandscapeColor {
     Mountain = '#f1e6d1',
     Road = ORANGE,
     Wall = GREY,
+    KingdomBorder = GREY,
 }
 
 export enum LabelColor {
@@ -33,6 +34,7 @@ export enum LabelColor {
     Water = '#1a6b8a',
     Mountain = '#5a4208',
     Road = '#bd7c05',
+    Kingdom = GREY,
     Wall = BLACK,
     Location = BLACK,
 }
