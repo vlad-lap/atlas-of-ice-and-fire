@@ -56,13 +56,14 @@ export enum LocationRadius {
 
 export const TOUCH_HIT_RADIUS_PX = 15;
 
-export const POINT_CIRCLE_LAYER_IDS = [
+export const TOOLTIP_LAYER_IDS = [
     'cities-circle',
     'towns-circle',
-    'great-castles-circle',
+    'greatCastles-circle',
     'castles-circle',
     'ruins-circle',
-    'other-locations-circle',
+    'other-circle',
+    'wall-line',
 ];
 
 export enum FontStyle {

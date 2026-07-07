@@ -7,7 +7,6 @@ export const GREAT_CASTLES = [
     'The Eyrie',
     'Pyke',
     'Harrenhal',
-    "King's Landing",
     "Storm's End",
     'Highgarden',
     'Sunspear',

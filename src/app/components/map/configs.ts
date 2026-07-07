@@ -1,5 +1,6 @@
 import {
     CircleLayerSpecification,
+    ExpressionSpecification,
     FillLayerSpecification,
     ImageSourceSpecification,
     LineLayerSpecification,
@@ -17,8 +18,9 @@ import {
     LocationColor,
     LocationRadius,
     MapBounds,
+    ZoomLevel,
 } from './constants';
-import { GeodataDict, LineGeodataDict, PointGeodataDict, PolygonGeodataDict } from '../../models';
+import { GeodataDict, LocationDict } from '../../models';
 
 export const MAP_STYLE: StyleSpecification = {
     version: 8,
@@ -51,7 +53,7 @@ export const NORTH_GRADIENT_PAINT: RasterLayerSpecification['paint'] = {
     'raster-fade-duration': 0,
 };
 
-export const POLYGONS_PAINT: Partial<PolygonGeodataDict<FillLayerSpecification['paint']>> = {
+export const POLYGONS_PAINT: GeodataDict<FillLayerSpecification['paint']> = {
     continents: {
         'fill-color': LandscapeColor.Land,
     },
@@ -70,7 +72,7 @@ export const POLYGONS_PAINT: Partial<PolygonGeodataDict<FillLayerSpecification['
     },
 };
 
-export const LINES_PAINT: Partial<LineGeodataDict<LineLayerSpecification['paint']>> = {
+export const LINES_PAINT: GeodataDict<LineLayerSpecification['paint']> = {
     rivers: {
         'line-color': LandscapeColor.Water,
     },
@@ -88,7 +90,23 @@ export const LINES_PAINT: Partial<LineGeodataDict<LineLayerSpecification['paint'
     },
 };
 
-const DEFAULT_POINTS_PAINT: CircleLayerSpecification['paint'] = {
+export const LOCATIONS_FILTER: LocationDict<ExpressionSpecification> = {
+    cities: ['==', ['get', 'type'], 'City'],
+    towns: ['==', ['get', 'type'], 'Town'],
+    greatCastles: ['all', ['==', ['get', 'type'], 'Castle'], ['==', ['get', 'size'], 4]],
+    castles: ['all', ['==', ['get', 'type'], 'Castle'], ['==', ['get', 'size'], 3]],
+    ruins: ['==', ['get', 'type'], 'Ruin'],
+    other: ['==', ['get', 'type'], 'Other'],
+};
+
+export const LOCATIONS_MIN_ZOOM: LocationDict<ZoomLevel> = {
+    towns: ZoomLevel.Medium,
+    castles: ZoomLevel.Medium,
+    ruins: ZoomLevel.High,
+    other: ZoomLevel.High,
+};
+
+export const POINTS_PAINT: CircleLayerSpecification['paint'] = {
     'circle-radius': [
         'match',
         ['get', 'size'],
@@ -104,38 +122,39 @@ const DEFAULT_POINTS_PAINT: CircleLayerSpecification['paint'] = {
         LocationRadius.XL,
         LocationRadius.MD,
     ],
+    'circle-color': [
+        'match',
+        ['get', 'type'],
+        'City',
+        LocationColor.City,
+        'Town',
+        LocationColor.Town,
+        'Castle',
+        LocationColor.Castle,
+        'Ruin',
+        LocationColor.Ruin,
+        'Other',
+        LocationColor.Other,
+        LocationColor.Other,
+    ],
     'circle-stroke-color': BLACK,
-    'circle-stroke-width': 1,
+    'circle-stroke-width': [
+        'case',
+        LOCATIONS_FILTER.cities,
+        2,
+        LOCATIONS_FILTER.greatCastles,
+        2,
+        1,
+    ],
 };
 
-export const POINTS_PAINT: Partial<PointGeodataDict<CircleLayerSpecification['paint']>> = {
-    cities: {
-        ...DEFAULT_POINTS_PAINT,
-        'circle-color': LocationColor.City,
-        'circle-stroke-width': 2,
-    },
-    towns: {
-        ...DEFAULT_POINTS_PAINT,
-        'circle-color': LocationColor.Town,
-    },
-    greatCastles: {
-        ...DEFAULT_POINTS_PAINT,
-        'circle-radius': LocationRadius.LG,
-        'circle-color': LocationColor.Castle,
-        'circle-stroke-width': 2,
-    },
-    castles: {
-        ...DEFAULT_POINTS_PAINT,
-        'circle-color': LocationColor.Castle,
-    },
-    ruins: {
-        ...DEFAULT_POINTS_PAINT,
-        'circle-color': LocationColor.Ruin,
-    },
-    otherLocations: {
-        ...DEFAULT_POINTS_PAINT,
-        'circle-color': LocationColor.Other,
-    },
+export const LABELS_MIN_ZOOM: GeodataDict<ZoomLevel> = {
+    mountains: ZoomLevel.Medium,
+    forests: ZoomLevel.Medium,
+    islands: ZoomLevel.Medium,
+    lakes: ZoomLevel.Medium,
+    rivers: ZoomLevel.Low,
+    roads: ZoomLevel.Medium,
 };
 
 const DEFAULT_LABEL_LAYOUT: SymbolLayerSpecification['layout'] = {
@@ -151,11 +170,25 @@ const DEFAULT_LINE_LABEL_LAYOUT: SymbolLayerSpecification['layout'] = {
 
 const DEFAULT_POINT_LABEL_LAYOUT: SymbolLayerSpecification['layout'] = {
     ...DEFAULT_LABEL_LAYOUT,
-    'text-font': [FontStyle.Regular],
-    'text-size': FontSize.Medium,
     'text-variable-anchor': ['bottom', 'top', 'left', 'right'],
     'text-radial-offset': 0.6,
     'text-justify': 'auto',
+    'text-font': [
+        'case',
+        LOCATIONS_FILTER.cities,
+        ['literal', [FontStyle.Bold]],
+        LOCATIONS_FILTER.greatCastles,
+        ['literal', [FontStyle.Bold]],
+        ['literal', [FontStyle.Regular]],
+    ],
+    'text-size': [
+        'case',
+        LOCATIONS_FILTER.cities,
+        FontSize.Large,
+        LOCATIONS_FILTER.greatCastles,
+        FontSize.Large,
+        FontSize.Medium,
+    ],
 };
 
 export const LABEL_LAYOUT: Partial<GeodataDict<SymbolLayerSpecification['layout']>> = {
@@ -179,22 +212,7 @@ export const LABEL_LAYOUT: Partial<GeodataDict<SymbolLayerSpecification['layout'
         'text-font': [FontStyle.Bold],
         'text-size': FontSize.Large,
     },
-    cities: {
-        ...DEFAULT_POINT_LABEL_LAYOUT,
-        'text-font': [FontStyle.Bold],
-        'text-size': FontSize.Large,
-    },
-    towns: DEFAULT_POINT_LABEL_LAYOUT,
-    greatCastles: {
-        ...DEFAULT_POINT_LABEL_LAYOUT,
-        'text-font': [FontStyle.Bold],
-        'text-size': FontSize.Large,
-    },
-    castles: DEFAULT_POINT_LABEL_LAYOUT,
-    ruins: {
-        ...DEFAULT_POINT_LABEL_LAYOUT,
-        'text-size': FontSize.Small,
-    },
+    locations: DEFAULT_POINT_LABEL_LAYOUT,
 };
 
 export const DEFAULT_LAND_LABEL_PAINT: SymbolLayerSpecification['paint'] = {
@@ -218,9 +236,5 @@ export const LABEL_PAINT: Partial<GeodataDict<SymbolLayerSpecification['paint']>
     rivers: DEFAULT_WATER_LABEL_PAINT,
     roads: { 'text-color': LabelColor.Road },
     wall: { 'text-color': LabelColor.Wall },
-    cities: DEFAULT_POINT_LABEL_PAINT,
-    towns: DEFAULT_POINT_LABEL_PAINT,
-    greatCastles: DEFAULT_POINT_LABEL_PAINT,
-    castles: DEFAULT_POINT_LABEL_PAINT,
-    ruins: DEFAULT_POINT_LABEL_PAINT,
+    locations: DEFAULT_POINT_LABEL_PAINT,
 };

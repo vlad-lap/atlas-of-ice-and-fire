@@ -29,93 +29,31 @@
     (mapLoad)="onMapLoad($event)"
     (mapClick)="onMapClick($event)"
 >
-    <mgl-geojson-source
-        id="continents"
-        [data]="geodataUrls.continents"
-    />
-    <mgl-layer
-        id="continents-fill"
-        type="fill"
-        source="continents"
-        [paint]="polygonsPaint.continents"
-    />
+    @for (polygonType of polygonTypes; track polygonType) {
+        <mgl-geojson-source
+            [id]="polygonType"
+            [data]="geodataUrls[polygonType]"
+        />
+        <mgl-layer
+            [id]="polygonType + '-fill'"
+            type="fill"
+            [source]="polygonType"
+            [paint]="polygonsPaint[polygonType]"
+        />
+    }
 
-    <mgl-geojson-source
-        id="mountains"
-        [data]="geodataUrls.mountains"
-    />
-    <mgl-layer
-        id="mountains-fill"
-        type="fill"
-        source="mountains"
-        [paint]="polygonsPaint.mountains"
-    />
-
-    <mgl-geojson-source
-        id="forests"
-        [data]="geodataUrls.forests"
-    />
-    <mgl-layer
-        id="forests-fill"
-        type="fill"
-        source="forests"
-        [paint]="polygonsPaint.forests"
-    />
-
-    <mgl-geojson-source
-        id="lakes"
-        [data]="geodataUrls.lakes"
-    />
-    <mgl-layer
-        id="lakes-fill"
-        type="fill"
-        source="lakes"
-        [paint]="polygonsPaint.lakes"
-    />
-
-    <mgl-geojson-source
-        id="islands"
-        [data]="geodataUrls.islands"
-    />
-    <mgl-layer
-        id="islands-fill"
-        type="fill"
-        source="islands"
-        [paint]="polygonsPaint.islands"
-    />
-
-    <mgl-geojson-source
-        id="kingdom-borders"
-        [data]="geodataUrls.kingdomBorders"
-    />
-    <mgl-layer
-        id="kingdom-borders-line"
-        type="line"
-        source="kingdom-borders"
-        [paint]="linesPaint.kingdomBorders"
-    />
-
-    <mgl-geojson-source
-        id="rivers"
-        [data]="geodataUrls.rivers"
-    />
-    <mgl-layer
-        id="rivers-line"
-        type="line"
-        source="rivers"
-        [paint]="linesPaint.rivers"
-    />
-
-    <mgl-geojson-source
-        id="roads"
-        [data]="geodataUrls.roads"
-    />
-    <mgl-layer
-        id="roads-line"
-        type="line"
-        source="roads"
-        [paint]="linesPaint.roads"
-    />
+    @for (lineType of lineTypes; track lineType) {
+        <mgl-geojson-source
+            [id]="lineType"
+            [data]="geodataUrls[lineType]"
+        />
+        <mgl-layer
+            [id]="lineType + '-line'"
+            type="line"
+            [source]="lineType"
+            [paint]="linesPaint[lineType]"
+        />
+    }
 
     <mgl-geojson-source
         id="wall"
@@ -126,61 +64,21 @@
         type="line"
         source="wall"
         [paint]="linesPaint.wall"
+        before="wall-label"
+        (layerMouseEnter)="onFeatureEnter($event)"
+        (layerMouseLeave)="onFeatureLeave()"
     />
 
-    <mgl-layer
-        id="mountains-label"
-        type="symbol"
-        source="mountains"
-        [layout]="labelLayout.mountains"
-        [paint]="labelPaint.mountains"
-        [minzoom]="ZoomLevel.Medium"
-    />
-
-    <mgl-layer
-        id="forests-label"
-        type="symbol"
-        source="forests"
-        [layout]="labelLayout.forests"
-        [paint]="labelPaint.forests"
-        [minzoom]="ZoomLevel.Medium"
-    />
-
-    <mgl-layer
-        id="lakes-label"
-        type="symbol"
-        source="lakes"
-        [layout]="labelLayout.lakes"
-        [paint]="labelPaint.lakes"
-        [minzoom]="ZoomLevel.Medium"
-    />
-
-    <mgl-layer
-        id="islands-label"
-        type="symbol"
-        source="islands"
-        [layout]="labelLayout.islands"
-        [paint]="labelPaint.islands"
-        [minzoom]="ZoomLevel.Medium"
-    />
-
-    <mgl-layer
-        id="rivers-label"
-        type="symbol"
-        source="rivers"
-        [layout]="labelLayout.rivers"
-        [paint]="labelPaint.rivers"
-        [minzoom]="ZoomLevel.Low"
-    />
-
-    <mgl-layer
-        id="roads-label"
-        type="symbol"
-        source="roads"
-        [layout]="labelLayout.roads"
-        [paint]="labelPaint.roads"
-        [minzoom]="ZoomLevel.Medium"
-    />
+    @for (labeledType of labeledTypes; track labeledType) {
+        <mgl-layer
+            [id]="labeledType + '-label'"
+            type="symbol"
+            [source]="labeledType"
+            [layout]="labelLayout[labeledType]"
+            [paint]="labelPaint[labeledType]"
+            [minzoom]="labelsMinZoom[labeledType] || 0"
+        />
+    }
 
     <mgl-geojson-source
         id="kingdoms-label-points"
@@ -193,135 +91,38 @@
         [layout]="labelLayout.kingdoms"
         [paint]="labelPaint.kingdoms"
         [maxzoom]="ZoomLevel.Medium"
-    />
-
-    <mgl-layer
-        id="wall-label"
-        type="symbol"
-        source="wall"
-        [layout]="labelLayout.wall"
-        [paint]="labelPaint.wall"
+        before="cities-circle"
     />
 
     <mgl-geojson-source
-        id="cities"
-        [data]="geodataUrls.cities"
-    />
-    <mgl-layer
-        id="cities-circle"
-        type="circle"
-        source="cities"
-        [paint]="pointsPaint.cities"
-        (layerMouseEnter)="onPointEnter($event)"
-        (layerMouseLeave)="onPointLeave()"
-    />
-    <mgl-layer
-        id="cities-label"
-        type="symbol"
-        source="cities"
-        [layout]="labelLayout.cities"
-        [paint]="labelPaint.cities"
+        id="locations"
+        [data]="geodataUrls.locations"
     />
 
-    <mgl-geojson-source
-        id="towns"
-        [data]="geodataUrls.towns"
-    />
-    <mgl-layer
-        id="towns-circle"
-        type="circle"
-        source="towns"
-        [paint]="pointsPaint.towns"
-        [minzoom]="ZoomLevel.Medium"
-        (layerMouseEnter)="onPointEnter($event)"
-        (layerMouseLeave)="onPointLeave()"
-    />
-    <mgl-layer
-        id="towns-label"
-        type="symbol"
-        source="towns"
-        [layout]="labelLayout.towns"
-        [paint]="labelPaint.towns"
-        [minzoom]="ZoomLevel.Medium"
-    />
+    @for (type of locationTypes; track type) {
+        <mgl-layer
+            [id]="type + '-circle'"
+            type="circle"
+            source="locations"
+            [filter]="locationsFilter[type]"
+            [paint]="pointsPaint"
+            [minzoom]="locationsMinZoom[type] || 0"
+            (layerMouseEnter)="onFeatureEnter($event)"
+            (layerMouseLeave)="onFeatureLeave()"
+        />
 
-    <mgl-geojson-source
-        id="great-castles"
-        [data]="geodataUrls.greatCastles"
-    />
-    <mgl-layer
-        id="great-castles-circle"
-        type="circle"
-        source="great-castles"
-        [paint]="pointsPaint.greatCastles"
-        (layerMouseEnter)="onPointEnter($event)"
-        (layerMouseLeave)="onPointLeave()"
-    />
-    <mgl-layer
-        id="great-castles-label"
-        type="symbol"
-        source="great-castles"
-        [layout]="labelLayout.greatCastles"
-        [paint]="labelPaint.greatCastles"
-    />
-
-    <mgl-geojson-source
-        id="castles"
-        [data]="geodataUrls.castles"
-    />
-    <mgl-layer
-        id="castles-circle"
-        type="circle"
-        source="castles"
-        [paint]="pointsPaint.castles"
-        [minzoom]="ZoomLevel.Medium"
-        (layerMouseEnter)="onPointEnter($event)"
-        (layerMouseLeave)="onPointLeave()"
-    />
-    <mgl-layer
-        id="castles-label"
-        type="symbol"
-        source="castles"
-        [layout]="labelLayout.castles"
-        [paint]="labelPaint.castles"
-        [minzoom]="ZoomLevel.Medium"
-    />
-
-    <mgl-geojson-source
-        id="ruins"
-        [data]="geodataUrls.ruins"
-    />
-    <mgl-layer
-        id="ruins-circle"
-        type="circle"
-        source="ruins"
-        [paint]="pointsPaint.ruins"
-        [minzoom]="ZoomLevel.High"
-        (layerMouseEnter)="onPointEnter($event)"
-        (layerMouseLeave)="onPointLeave()"
-    />
-    <mgl-layer
-        id="ruins-label"
-        type="symbol"
-        source="ruins"
-        [layout]="labelLayout.ruins"
-        [paint]="labelPaint.ruins"
-        [minzoom]="ZoomLevel.High"
-    />
-
-    <mgl-geojson-source
-        id="other-locations"
-        [data]="geodataUrls.otherLocations"
-    />
-    <mgl-layer
-        id="other-locations-circle"
-        type="circle"
-        source="other-locations"
-        [paint]="pointsPaint.otherLocations"
-        [minzoom]="ZoomLevel.High"
-        (layerMouseEnter)="onPointEnter($event)"
-        (layerMouseLeave)="onPointLeave()"
-    />
+        @if (type !== 'other') {
+            <mgl-layer
+                [id]="type + '-label'"
+                type="symbol"
+                source="locations"
+                [filter]="locationsFilter[type]"
+                [minzoom]="locationsMinZoom[type] || 0"
+                [layout]="labelLayout.locations"
+                [paint]="labelPaint.locations"
+            />
+        }
+    }
 
     <mgl-image-source
         id="north-gradient"

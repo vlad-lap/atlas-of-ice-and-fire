@@ -22,18 +22,22 @@ import {
 } from 'maplibre-gl';
 import { Point } from 'geojson';
 import { GEODATA_URLS } from '../../constants';
+import { INITIAL_MAP_CENTER, TOOLTIP_LAYER_IDS, TOUCH_HIT_RADIUS_PX, ZoomLevel } from './constants';
 import {
-    INITIAL_MAP_CENTER,
-    POINT_CIRCLE_LAYER_IDS,
-    TOUCH_HIT_RADIUS_PX,
-    ZoomLevel,
-} from './constants';
-import { LocationData } from '../../models';
+    GeodataType,
+    LineGeodataType,
+    LocationData,
+    LocationType,
+    PolygonGeodataType,
+} from '../../models';
 import { GeodataState } from '../../store/geodata';
 import {
     LABEL_LAYOUT,
     LABEL_PAINT,
+    LABELS_MIN_ZOOM,
     LINES_PAINT,
+    LOCATIONS_FILTER,
+    LOCATIONS_MIN_ZOOM,
     MAP_BOUNDS,
     MAP_STYLE,
     NORTH_GRADIENT_COORDINATES,
@@ -71,6 +75,25 @@ export class AtlasMapComponent {
     protected readonly maxBounds = MAP_BOUNDS;
     protected readonly initialCenter = INITIAL_MAP_CENTER;
 
+    protected readonly polygonTypes: PolygonGeodataType[] = [
+        'continents',
+        'mountains',
+        'forests',
+        'lakes',
+        'islands',
+    ];
+    protected readonly lineTypes: LineGeodataType[] = ['kingdomBorders', 'rivers', 'roads'];
+
+    protected readonly labeledTypes: GeodataType[] = [
+        'mountains',
+        'forests',
+        'lakes',
+        'islands',
+        'rivers',
+        'roads',
+        'wall',
+    ];
+
     protected readonly kingdomsLabelPoints = this.store.selectSignal(
         GeodataState.labelPoints('kingdoms'),
     );
@@ -79,8 +102,20 @@ export class AtlasMapComponent {
     protected readonly linesPaint = LINES_PAINT;
     protected readonly pointsPaint = POINTS_PAINT;
 
+    protected readonly locationTypes: LocationType[] = [
+        'cities',
+        'towns',
+        'greatCastles',
+        'castles',
+        'ruins',
+        'other',
+    ];
+    protected readonly locationsFilter = LOCATIONS_FILTER;
+    protected readonly locationsMinZoom = LOCATIONS_MIN_ZOOM;
+
     protected readonly labelLayout = LABEL_LAYOUT;
     protected readonly labelPaint = LABEL_PAINT;
+    protected readonly labelsMinZoom = LABELS_MIN_ZOOM;
 
     protected readonly northGradientUrl = this.buildNorthGradientUrl();
     protected readonly northGradientCoordinates = NORTH_GRADIENT_COORDINATES;
@@ -104,7 +139,7 @@ export class AtlasMapComponent {
         this.map().mapInstance.flyTo({ center: INITIAL_MAP_CENTER, zoom: ZoomLevel.Low });
     }
 
-    onPointEnter({ target, features }: MapLayerMouseEvent): void {
+    onFeatureEnter({ lngLat, target, features }: MapLayerMouseEvent): void {
         if (!this.hasHover) {
             return;
         }
@@ -114,17 +149,17 @@ export class AtlasMapComponent {
             return;
         }
 
-        this.showPointTooltip(target, feature);
+        this.showTooltip(target, feature, lngLat);
     }
 
-    onPointLeave(): void {
+    onFeatureLeave(): void {
         this.popup?.remove();
         this.popup = null;
         this.tooltipRef?.destroy();
         this.tooltipRef = null;
     }
 
-    onMapClick({ target, point: { x, y } }: MapMouseEvent): void {
+    onMapClick({ target, lngLat, point: { x, y } }: MapMouseEvent): void {
         if (this.hasHover) {
             return;
         }
@@ -134,32 +169,33 @@ export class AtlasMapComponent {
                 [x - TOUCH_HIT_RADIUS_PX, y - TOUCH_HIT_RADIUS_PX],
                 [x + TOUCH_HIT_RADIUS_PX, y + TOUCH_HIT_RADIUS_PX],
             ],
-            { layers: POINT_CIRCLE_LAYER_IDS },
+            { layers: TOOLTIP_LAYER_IDS },
         );
 
         if (!feature?.properties?.name) {
-            this.onPointLeave();
+            this.onFeatureLeave();
             return;
         }
 
-        this.showPointTooltip(target, feature);
+        this.showTooltip(target, feature, lngLat);
     }
 
     openAboutDialog(): void {
         this.dialog.open(AboutDialogComponent);
     }
 
-    private showPointTooltip(
+    private showTooltip(
         map: MapLayerMouseEvent['target'],
         { geometry, properties }: MapGeoJSONFeature,
+        lngLat: LngLatLike,
     ): void {
-        const lngLat = (geometry as Point).coordinates as LngLatLike;
+        const anchor = geometry.type === 'Point' ? (geometry.coordinates as LngLatLike) : lngLat;
 
         this.popup?.remove();
         this.tooltipRef?.destroy();
         this.popup = new Popup({ closeButton: false, closeOnClick: false })
-            .setLngLat(lngLat)
-            .setDOMContent(this.buildPointTooltip(properties as LocationData))
+            .setLngLat(anchor)
+            .setDOMContent(this.buildTooltip(properties as LocationData))
             .addTo(map);
     }
 
@@ -176,7 +212,7 @@ export class AtlasMapComponent {
         return canvas.toDataURL();
     }
 
-    private buildPointTooltip(location: LocationData): HTMLElement {
+    private buildTooltip(location: LocationData): HTMLElement {
         this.tooltipRef = this.viewContainerRef.createComponent(MapTooltipComponent);
         this.tooltipRef.setInput('location', location);
         this.tooltipRef.changeDetectorRef.detectChanges();

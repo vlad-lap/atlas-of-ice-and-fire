@@ -35,28 +35,6 @@ function processGeoJSON(fileName, filterFn) {
     return processed;
 }
 
-function splitAndWrite(geodata, category) {
-    const byType = splitByType(geodata);
-
-    for (const [type, collection] of Object.entries(byType)) {
-        if (type === 'Castle') {
-            const greatCastles = filterGeodata(collection, f =>
-                GREAT_CASTLES.includes(f.properties.name),
-            );
-
-            const otherCastles = filterGeodata(
-                collection,
-                f => !GREAT_CASTLES.includes(f.properties.name),
-            );
-
-            writeGeoJSON(`got_${category}_great_castle.geojson`, greatCastles);
-            writeGeoJSON(`got_${category}_castle.geojson`, otherCastles);
-        } else {
-            writeGeoJSON(`got_${category}_${type.toLowerCase()}.geojson`, collection);
-        }
-    }
-}
-
 mkdirSync(GEODATA, { recursive: true });
 
 const filterDisplayedContinent = key => feature =>
@@ -69,27 +47,33 @@ const filteredContinents = processGeoJSON(
 const filteredIslands = processGeoJSON('got_islands.geojson', filterDisplayedContinent());
 const kingdoms = processGeoJSON('got_political.geojson');
 
-['got_lakes.geojson', 'got_rivers.geojson', 'got_roads.geojson'].forEach(fileName =>
-    processGeoJSON(fileName, filterDisplayedContinent()),
-);
-
+processGeoJSON('got_lakes.geojson', filterDisplayedContinent());
+processGeoJSON('got_rivers.geojson', filterDisplayedContinent());
+processGeoJSON('got_roads.geojson', filterDisplayedContinent());
 processGeoJSON('got_wall.geojson');
 
 const borders = buildKingdomBorders(kingdoms, filteredContinents, filteredIslands);
-
 writeGeoJSON('got_political_borders.geojson', borders);
 
 const locations = readGeoJSON('got_locations.geojson');
 const filteredLocations = locationsInContinent(locations, filteredContinents, filteredIslands);
 const locationsWithExtras = {
     ...filteredLocations,
-    features: [...filteredLocations.features, ...EXTRA_LOCATIONS],
+    features: [...filteredLocations.features, ...EXTRA_LOCATIONS].map(feature => {
+        const isGreatCastle = GREAT_CASTLES.includes(feature.properties.name);
+        const size = isGreatCastle ? 4 : feature.properties.size;
+        const properties = { ...feature.properties, size };
+        return { ...feature, properties };
+    }),
 };
-console.log(`${DISPLAYED_CONTINENT} locations: ${locationsWithExtras.features.length} features`);
 
-splitAndWrite(locationsWithExtras, 'locations');
+console.log(`${DISPLAYED_CONTINENT} locations: ${locationsWithExtras.features.length} features`);
+writeGeoJSON('got_locations.geojson', locationsWithExtras);
 
 const landscape = readGeoJSON('got_landscape.geojson');
 const filteredLandscape = filterGeodata(landscape, filterDisplayedContinent());
+const landscapeByType = splitByType(filteredLandscape);
 
-splitAndWrite(filteredLandscape, 'landscape');
+for (const [type, collection] of Object.entries(landscapeByType)) {
+    writeGeoJSON(`got_landscape_${type.toLowerCase()}.geojson`, collection);
+}
