@@ -20,7 +20,6 @@ import {
     MapMouseEvent,
     Popup,
 } from 'maplibre-gl';
-import { Point } from 'geojson';
 import { GEODATA_URLS } from '../../constants';
 import { INITIAL_MAP_CENTER, TOOLTIP_LAYER_IDS, TOUCH_HIT_RADIUS_PX, ZoomLevel } from './constants';
 import {
