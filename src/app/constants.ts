@@ -11,10 +11,5 @@ export const GEODATA_URLS: GeodataDict<string> = {
     kingdomBorders: 'geodata/got_political_borders.geojson',
     roads: 'geodata/got_roads.geojson',
     wall: 'geodata/got_wall.geojson',
-    cities: 'geodata/got_locations_city.geojson',
-    towns: 'geodata/got_locations_town.geojson',
-    greatCastles: 'geodata/got_locations_great_castle.geojson',
-    castles: 'geodata/got_locations_castle.geojson',
-    ruins: 'geodata/got_locations_ruin.geojson',
-    otherLocations: 'geodata/got_locations_other.geojson',
+    locations: 'geodata/got_locations.geojson',
 };

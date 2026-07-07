@@ -15,6 +15,10 @@ The original dataset is licensed under the **Creative Commons Attribution–NonC
 - Source: https://github.com/mapbox/GOT-Inspired-Map
 - License: https://creativecommons.org/licenses/by-nc-sa/3.0/
 
+## Data Processing
+
+Original GeoJSON files are modified only to fix obvious factual issues such as spelling mistakes. All structural transformations are performed by preprocessing scripts.
+
 ## Tech Stack
 
 - **Angular 21** — standalone components, signals, lazy-loaded routes

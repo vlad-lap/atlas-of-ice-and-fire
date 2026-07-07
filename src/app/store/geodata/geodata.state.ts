@@ -5,10 +5,12 @@ import { HttpClient } from '@angular/common/http';
 import { GetGeodata } from './geodata.actions';
 import { Observable, tap } from 'rxjs';
 import { GEODATA_URLS } from '../../constants';
-import { Geometry, GeodataStateModel } from '../../models';
+import { Geometry, GeodataDict, GeodataType } from '../../models';
 import { getCentralPoint } from '../../utils';
 
 const EMPTY: FeatureCollection<Point> = { type: 'FeatureCollection', features: [] };
+
+type GeodataStateModel = GeodataDict<FeatureCollection>;
 
 @State<GeodataStateModel>({
     name: 'geodata',
@@ -16,14 +18,14 @@ const EMPTY: FeatureCollection<Point> = { type: 'FeatureCollection', features: [
 })
 @Injectable()
 export class GeodataState {
-    static geodata(key: keyof GeodataStateModel) {
+    static geodata(key: GeodataType) {
         return createSelector(
             [GeodataState],
             (state: GeodataStateModel): FeatureCollection => state[key],
         );
     }
 
-    static labelPoints(key: keyof GeodataStateModel) {
+    static labelPoints(key: GeodataType) {
         return createSelector(
             [GeodataState],
             (state: GeodataStateModel): FeatureCollection<Point> => {
