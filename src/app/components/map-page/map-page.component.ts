@@ -61,7 +61,7 @@ import { MapSearchComponent } from '../map-search/map-search.component';
 import { KeyValuePipe } from '@angular/common';
 
 @Component({
-    selector: 'aif-map-page',
+    selector: 'cc-map-page',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         MapComponent,

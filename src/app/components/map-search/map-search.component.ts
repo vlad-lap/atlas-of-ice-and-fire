@@ -33,15 +33,16 @@ const OPTIONS_GROUP_ORDER: OptionGroup[] = [
     'wall',
     'roads',
 
+    'continents',
+    'islands',
     'rivers',
     'lakes',
     'mountains',
     'forests',
-    'islands',
 ];
 
 @Component({
-    selector: 'aif-map-search',
+    selector: 'cc-map-search',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         CommonModule,

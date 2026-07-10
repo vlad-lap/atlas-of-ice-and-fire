@@ -1,8 +1,8 @@
-# Atlas of Ice and Fire
+# Compass of Crowns
 
 ## Disclaimer
 
-Atlas of Ice and Fire is an unofficial, non-commercial fan project. It is not affiliated with or endorsed by George R. R. Martin, HBO, or any other rights holders.
+Compass of Crowns is an unofficial, non-commercial fan project. It is not affiliated with or endorsed by George R. R. Martin, HBO, or any other rights holders.
 
 ## Data Attribution
 
@@ -34,3 +34,9 @@ npm run build    # build geodata + production build
 ```
 
 Geodata is preprocessed from `vendors/` into `geodata/` by `scripts/build-geodata.mjs` before every serve/build.
+
+## License
+
+Copyright © 2026 vlad-lap
+
+The source code is licensed under the Mozilla Public License 2.0.

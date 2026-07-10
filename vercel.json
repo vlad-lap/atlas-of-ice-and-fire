@@ -1,6 +1,6 @@
 {
     "buildCommand": "npm run build",
-    "outputDirectory": "dist/atlas-of-ice-and-fire/browser",
+    "outputDirectory": "dist/compass-of-crowns/browser",
     "rewrites": [
         { "source": "/(.*)", "destination": "/index.html" }
     ]

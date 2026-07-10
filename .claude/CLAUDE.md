@@ -63,12 +63,13 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## Map Architecture
 
-- The `map` route (`/map`) renders `AtlasMapComponent` via MapLibre GL — this is the current map
-- `@maplibre/ngx-maplibre-gl` exports a `MapComponent` that collides with the legacy component name; import it aliased: `import { MapComponent as MglMap } from '@maplibre/ngx-maplibre-gl'`
-- All geodata URLs are in `src/app/constants.ts` (`GEODATA_URLS`); sources and layers are declared in the template; paint/layout configs live in `src/app/components/map/configs.ts`
+- There is a single route (`''`) that lazy-loads `MapPageComponent` from `src/app/components/map-page/` — this is the current (and only) map
+- All geodata URLs are in `src/app/constants.ts` (`GEODATA_URLS`); sources and layers are declared in the template; paint/layout configs live in `src/app/components/map-page/configs.ts`, map-specific constants (bounds, zoom levels, colors) live in `src/app/components/map-page/constants.ts`
+- Search is a separate `MapSearchComponent` (`src/app/components/map-search/`) using a Material autocomplete; it emits `applySearch`/`resetSearch` outputs that `MapPageComponent` handles to highlight and zoom to the selected feature (via a dedicated `search-highlight` GeoJSON source/layers) and show its tooltip
 
 ## Geodata State
 
-- GeoJSON data is loaded by `mapResolver` (attached to both map routes) before the route activates; it dispatches `GetGeodata` for each key into `GeodataState`
+- GeoJSON data is loaded by `mapResolver` (attached to the map route) before the route activates; it dispatches `GetGeodata` for each key into `GeodataState`
 - Read data in components with `store.selectSignal(GeodataState.geodata('key'))` or `store.selectSignal(GeodataState.labelPoints('key'))` — do not fetch with `HttpClient` directly in map components
-- Kingdom labels use a derived centroid-point source (`kingdomsLabelPoints`) computed via `computed()` over `getCentralPoint` from `src/app/utils/geometry.ts`; rendered from a separate `kingdoms-label-points` GeoJSON source to prevent duplicate labels across MapLibre internal tiles
+- `GeodataState.labelPoints(key)` is a memoized selector that maps polygon/multipolygon features to `Point` features via `getCentralPoint` from `src/app/utils/geometry.ts` — the centroid computation lives in the selector itself, not a component-level `computed()`. Kingdom labels read it directly (`kingdomsLabelPoints`) and render from a separate `kingdoms-label-points` GeoJSON source to prevent duplicate labels across MapLibre internal tiles
+- `GeodataState.searchOptions` and `GeodataState.byId(id)` back the search feature: `searchOptions` builds per-type `FeatureData[]` (via `getSearchOptions`/`getLocationsSearchOptions` in `src/app/utils/search.ts`), grouping all location subtypes together and excluding `locations`/`kingdomBorders`; `byId` looks up the full feature across all geodata types for zooming/highlighting. Search matching itself uses `matchesSearch` (prefix match per word) from the same file
