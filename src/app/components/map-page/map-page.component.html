@@ -26,7 +26,7 @@
     class="map"
     [mapStyle]="mapStyle"
     [center]="initialCenter"
-    [zoom]="[ZoomLevel.Low]"
+    [zoom]="[ZoomLevel.Initial]"
     [minZoom]="1"
     [maxZoom]="9"
     [maxBounds]="maxBounds"
@@ -129,18 +129,21 @@
         }
     }
 
-    <mgl-image-source
-        id="north-gradient"
-        [url]="northGradientUrl"
-        [coordinates]="northGradientCoordinates"
-    />
-    <mgl-layer
-        id="north-gradient-layer"
-        type="raster"
-        source="north-gradient"
-        [paint]="northGradientPaint"
-        before="cities-label"
-    />
+    @let gradients = gradientCoordinates | keyvalue;
+    @for (gradient of gradients; track gradient.key) {
+            <mgl-image-source
+                [id]="gradient.key + '-gradient'"
+                [url]="gradientUrl"
+                [coordinates]="gradient.value"
+            />
+            <mgl-layer
+                [id]="gradient.key + '-gradient-layer'"
+                type="raster"
+                [source]="gradient.key + '-gradient'"
+                [paint]="gradientPaint"
+                before="cities-label"
+            />
+    }
 
     <mgl-geojson-source
         id="search-highlight"

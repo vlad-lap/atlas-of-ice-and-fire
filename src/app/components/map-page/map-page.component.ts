@@ -36,6 +36,8 @@ import {
 } from '../../models';
 import { GeodataState } from '../../store/geodata';
 import {
+    GRADIENT_COORDINATES,
+    GRADIENT_PAINT,
     LABEL_LAYOUT,
     LABEL_PAINT,
     LABELS_MIN_ZOOM,
@@ -44,8 +46,6 @@ import {
     LOCATIONS_MIN_ZOOM,
     MAP_BOUNDS,
     MAP_STYLE,
-    NORTH_GRADIENT_COORDINATES,
-    NORTH_GRADIENT_PAINT,
     POINTS_PAINT,
     POLYGONS_PAINT,
     SEARCH_HIGHLIGHT_CIRCLE_PAINT,
@@ -58,6 +58,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AboutDialogComponent } from '../about-dialog/about-dialog.component';
 import { MapTooltipComponent } from '../map-tooltip/map-tooltip.component';
 import { MapSearchComponent } from '../map-search/map-search.component';
+import { KeyValuePipe } from '@angular/common';
 
 @Component({
     selector: 'aif-map-page',
@@ -71,6 +72,7 @@ import { MapSearchComponent } from '../map-search/map-search.component';
         MatIcon,
         MatIconButton,
         MapSearchComponent,
+        KeyValuePipe,
     ],
     templateUrl: './map-page.component.html',
     styleUrl: './map-page.component.scss',
@@ -143,9 +145,9 @@ export class MapPageComponent {
     protected readonly labelPaint = LABEL_PAINT;
     protected readonly labelsMinZoom = LABELS_MIN_ZOOM;
 
-    protected readonly northGradientUrl = this.buildNorthGradientUrl();
-    protected readonly northGradientCoordinates = NORTH_GRADIENT_COORDINATES;
-    protected readonly northGradientPaint = NORTH_GRADIENT_PAINT;
+    protected readonly gradientUrl = this.buildGradientUrl();
+    protected readonly gradientCoordinates = GRADIENT_COORDINATES;
+    protected readonly gradientPaint = GRADIENT_PAINT;
 
     protected readonly searchHighlightLinePaint = SEARCH_HIGHLIGHT_LINE_PAINT;
     protected readonly searchHighlightCirclePaint = SEARCH_HIGHLIGHT_CIRCLE_PAINT;
@@ -165,7 +167,7 @@ export class MapPageComponent {
     }
 
     onHomeClick(): void {
-        this.map().mapInstance.flyTo({ center: INITIAL_MAP_CENTER, zoom: ZoomLevel.Low });
+        this.map().mapInstance.flyTo({ center: INITIAL_MAP_CENTER, zoom: ZoomLevel.Initial });
     }
 
     onFeatureEnter({ lngLat, target, features }: MapLayerMouseEvent): void {
@@ -268,7 +270,7 @@ export class MapPageComponent {
             .addTo(map);
     }
 
-    private buildNorthGradientUrl(): string {
+    private buildGradientUrl(): string {
         const canvas = document.createElement('canvas');
         canvas.width = 1;
         canvas.height = 256;

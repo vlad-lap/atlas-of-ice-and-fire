@@ -2,15 +2,16 @@ import { LngLatLike } from 'maplibre-gl';
 
 export enum MapBounds {
     North = 43,
-    South = -40,
-    East = 100,
-    West = -60,
+    South = -42,
+    East = 92,
+    West = -10,
 }
 
 export const INITIAL_MAP_CENTER: LngLatLike = [15, 10];
 
 export enum ZoomLevel {
     Low = 3,
+    Initial = 3.75,
     Medium = 4.5,
     High = 6,
 }

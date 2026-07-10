@@ -44,14 +44,36 @@ export const MAP_BOUNDS: LngLatBoundsLike = [
     [MapBounds.East, MapBounds.North],
 ];
 
-export const NORTH_GRADIENT_COORDINATES: ImageSourceSpecification['coordinates'] = [
-    [MapBounds.West, MapBounds.North],
-    [MapBounds.East, MapBounds.North],
-    [MapBounds.East, MapBounds.North - 4],
-    [MapBounds.West, MapBounds.North - 4],
-];
+const GRADIENT_WIDTH = 2;
 
-export const NORTH_GRADIENT_PAINT: RasterLayerSpecification['paint'] = {
+export const GRADIENT_COORDINATES: Record<string, ImageSourceSpecification['coordinates']> = {
+    north: [
+        [MapBounds.West, MapBounds.North],
+        [MapBounds.East, MapBounds.North],
+        [MapBounds.East, MapBounds.North - GRADIENT_WIDTH],
+        [MapBounds.West, MapBounds.North - GRADIENT_WIDTH],
+    ],
+    south: [
+        [MapBounds.West, MapBounds.South],
+        [MapBounds.East, MapBounds.South],
+        [MapBounds.East, MapBounds.South + GRADIENT_WIDTH],
+        [MapBounds.West, MapBounds.South + GRADIENT_WIDTH],
+    ],
+    east: [
+        [MapBounds.East, MapBounds.North],
+        [MapBounds.East, MapBounds.South],
+        [MapBounds.East - GRADIENT_WIDTH, MapBounds.South],
+        [MapBounds.East - GRADIENT_WIDTH, MapBounds.North],
+    ],
+    west: [
+        [MapBounds.West, MapBounds.North],
+        [MapBounds.West, MapBounds.South],
+        [MapBounds.West + GRADIENT_WIDTH, MapBounds.South],
+        [MapBounds.West + GRADIENT_WIDTH, MapBounds.North],
+    ],
+};
+
+export const GRADIENT_PAINT: RasterLayerSpecification['paint'] = {
     'raster-fade-duration': 0,
 };
 
