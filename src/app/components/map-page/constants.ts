@@ -11,7 +11,7 @@ export const INITIAL_MAP_CENTER: LngLatLike = [15, 10];
 
 export enum ZoomLevel {
     Low = 3,
-    Initial = 3.75,
+    Initial = 3.4,
     Medium = 4.5,
     High = 6,
 }

@@ -12,7 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
-    selector: 'aif-app-root',
+    selector: 'cc-app-root',
     imports: [RouterOutlet, MatProgressSpinner],
     templateUrl: './app.html',
     styleUrl: './app.scss',
