@@ -20,12 +20,19 @@ import {
     Map,
     MapGeoJSONFeature,
     MapLayerMouseEvent,
+    MapLibreEvent,
     MapMouseEvent,
     Popup,
 } from 'maplibre-gl';
 import { Feature, FeatureCollection } from 'geojson';
 import { GEODATA_URLS } from '../../constants';
-import { INITIAL_MAP_CENTER, TOOLTIP_LAYER_IDS, TOUCH_HIT_RADIUS_PX, ZoomLevel } from './constants';
+import {
+    INITIAL_MAP_CENTER,
+    MOUNTAIN_PATTERN_ID,
+    TOOLTIP_LAYER_IDS,
+    TOUCH_HIT_RADIUS_PX,
+    ZoomLevel,
+} from './constants';
 import {
     FeatureData,
     GeodataType,
@@ -41,15 +48,24 @@ import {
     LABEL_LAYOUT,
     LABEL_PAINT,
     LABELS_MIN_ZOOM,
+    LINES_LAYOUT,
     LINES_PAINT,
+    LINES_SHADOW,
+    LOCATION_LABELS_FILTER,
     LOCATIONS_FILTER,
     LOCATIONS_MIN_ZOOM,
     MAP_BOUNDS,
     MAP_STYLE,
+    MOUNTAINS_OUTLINE_LAYOUT,
+    MOUNTAINS_OUTLINE_PAINT,
     POINTS_PAINT,
+    POINTS_SHADOW,
     POLYGONS_PAINT,
+    POLYGONS_PATTERN,
     SEARCH_HIGHLIGHT_CIRCLE_PAINT,
     SEARCH_HIGHLIGHT_LINE_PAINT,
+    SYMBOL_MARKER_LAYOUT,
+    SYMBOL_MARKER_PAINT,
 } from './configs';
 import { getGeometryPositions, HighlightableGeometry } from '../../utils';
 import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
@@ -80,6 +96,8 @@ import { KeyValuePipe } from '@angular/common';
 export class MapPageComponent {
     readonly map = viewChild.required(MapComponent);
 
+    readonly isZoomedOut = signal<boolean>(false);
+
     readonly searchHighlightFeature = signal<Feature>(null);
 
     readonly searchHighlight = computed<FeatureCollection>(() => {
@@ -105,10 +123,10 @@ export class MapPageComponent {
 
     protected readonly polygonTypes: PolygonGeodataType[] = [
         'continents',
-        'mountains',
-        'forests',
         'lakes',
         'islands',
+        'mountains',
+        'forests',
     ];
     protected readonly lineTypes: LineGeodataType[] = ['kingdomBorders', 'rivers', 'roads'];
 
@@ -127,8 +145,20 @@ export class MapPageComponent {
     );
 
     protected readonly polygonsPaint = POLYGONS_PAINT;
+    protected readonly polygonsPattern = POLYGONS_PATTERN;
+
+    protected readonly mountainsOutlineLayout = MOUNTAINS_OUTLINE_LAYOUT;
+    protected readonly mountainsOutlinePaint = MOUNTAINS_OUTLINE_PAINT;
+
+    protected readonly linesLayout = LINES_LAYOUT;
     protected readonly linesPaint = LINES_PAINT;
+    protected readonly linesShadow = LINES_SHADOW;
+
     protected readonly pointsPaint = POINTS_PAINT;
+    protected readonly pointsShadow = POINTS_SHADOW;
+
+    protected readonly symbolMarkerLayout = SYMBOL_MARKER_LAYOUT;
+    protected readonly symbolMarkerPaint = SYMBOL_MARKER_PAINT;
 
     protected readonly locationTypes: LocationType[] = [
         'cities',
@@ -144,6 +174,7 @@ export class MapPageComponent {
     protected readonly labelLayout = LABEL_LAYOUT;
     protected readonly labelPaint = LABEL_PAINT;
     protected readonly labelsMinZoom = LABELS_MIN_ZOOM;
+    protected readonly locationLabelsFilter = LOCATION_LABELS_FILTER;
 
     protected readonly gradientUrl = this.buildGradientUrl();
     protected readonly gradientCoordinates = GRADIENT_COORDINATES;
@@ -162,8 +193,10 @@ export class MapPageComponent {
         private viewContainerRef: ViewContainerRef,
     ) {}
 
-    onMapLoad(map: Map): void {
+    async onMapLoad(map: Map): Promise<void> {
         map.touchZoomRotate.disableRotation();
+        const { data } = await map.loadImage('hillshade.png');
+        map.addImage(MOUNTAIN_PATTERN_ID, data);
     }
 
     onHomeClick(): void {
@@ -188,6 +221,13 @@ export class MapPageComponent {
         this.popup = null;
         this.tooltipRef?.destroy();
         this.tooltipRef = null;
+    }
+
+    onMapZoom(event: MapLibreEvent<MouseEvent | TouchEvent | WheelEvent | undefined>): void {
+        const isZoomedOut = event.target.getZoom() < ZoomLevel.Initial;
+        if (this.isZoomedOut() !== isZoomedOut) {
+            this.isZoomedOut.set(isZoomedOut);
+        }
     }
 
     onMapClick({ target, lngLat, point: { x, y } }: MapMouseEvent): void {
@@ -280,8 +320,8 @@ export class MapPageComponent {
         canvas.height = 256;
         const ctx = canvas.getContext('2d')!;
         const gradient = ctx.createLinearGradient(0, 0, 0, 256);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.75)');
-        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        gradient.addColorStop(0, 'rgba(250, 247, 239, 0.75)');
+        gradient.addColorStop(1, 'rgba(250, 247, 239, 0)');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, 1, 256);
         return canvas.toDataURL();

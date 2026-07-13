@@ -16,11 +16,13 @@ import {
     FontStyle,
     LabelColor,
     LandscapeColor,
-    LocationColor,
+    WHITE,
     LocationRadius,
     MapBounds,
+    MOUNTAIN_PATTERN_ID,
     RED,
     ZoomLevel,
+    SymbolMarkerSize,
 } from './constants';
 import { GeodataDict, LocationDict } from '../../models';
 
@@ -81,8 +83,11 @@ export const POLYGONS_PAINT: GeodataDict<FillLayerSpecification['paint']> = {
     continents: {
         'fill-color': LandscapeColor.Land,
     },
+    islands: {
+        'fill-color': LandscapeColor.Land,
+    },
     mountains: {
-        'fill-color': LandscapeColor.Mountain,
+        'fill-color': LandscapeColor.Land,
     },
     forests: {
         'fill-color': LandscapeColor.Forest,
@@ -91,8 +96,40 @@ export const POLYGONS_PAINT: GeodataDict<FillLayerSpecification['paint']> = {
     lakes: {
         'fill-color': LandscapeColor.Water,
     },
-    islands: {
-        'fill-color': LandscapeColor.Land,
+};
+
+export const POLYGONS_PATTERN: GeodataDict<FillLayerSpecification['paint']> = {
+    mountains: {
+        'fill-pattern': MOUNTAIN_PATTERN_ID,
+        'fill-opacity': 0.2,
+    },
+};
+
+export const MOUNTAINS_OUTLINE_LAYOUT: LineLayerSpecification['layout'] = {
+    'line-join': 'round',
+};
+
+export const MOUNTAINS_OUTLINE_PAINT: Record<string, LineLayerSpecification['paint']> = {
+    outline: {
+        'line-color': LandscapeColor.Land,
+        'line-width': 8,
+    },
+    blur: {
+        'line-color': LandscapeColor.Land,
+        'line-width': 10,
+        'line-blur': 10,
+        'line-offset': 5,
+    },
+};
+
+export const LINES_LAYOUT: GeodataDict<LineLayerSpecification['layout']> = {
+    roads: {
+        'line-cap': 'round',
+        'line-join': 'round',
+    },
+    wall: {
+        'line-cap': 'round',
+        'line-join': 'round',
     },
 };
 
@@ -114,6 +151,16 @@ export const LINES_PAINT: GeodataDict<LineLayerSpecification['paint']> = {
     },
 };
 
+export const LINES_SHADOW: GeodataDict<LineLayerSpecification['paint']> = {
+    wall: {
+        'line-color': BLACK,
+        'line-width': 7,
+        'line-opacity': 0.3,
+        'line-blur': 8,
+        'line-translate': [1, 1],
+    },
+};
+
 export const LOCATIONS_FILTER: LocationDict<ExpressionSpecification> = {
     cities: ['==', ['get', 'type'], 'City'],
     towns: ['==', ['get', 'type'], 'Town'],
@@ -121,6 +168,17 @@ export const LOCATIONS_FILTER: LocationDict<ExpressionSpecification> = {
     castles: ['all', ['==', ['get', 'type'], 'Castle'], ['==', ['get', 'size'], 3]],
     ruins: ['==', ['get', 'type'], 'Ruin'],
     other: ['==', ['get', 'type'], 'Other'],
+};
+
+export const LABEL_SIZE_FILTER: ExpressionSpecification = ['>', ['number', ['get', 'size']], 1];
+
+export const LOCATION_LABELS_FILTER: LocationDict<ExpressionSpecification> = {
+    cities: ['all', LOCATIONS_FILTER.cities, LABEL_SIZE_FILTER],
+    towns: ['all', LOCATIONS_FILTER.towns, LABEL_SIZE_FILTER],
+    greatCastles: ['all', LOCATIONS_FILTER.greatCastles, LABEL_SIZE_FILTER],
+    castles: ['all', LOCATIONS_FILTER.castles, LABEL_SIZE_FILTER],
+    ruins: ['all', LOCATIONS_FILTER.ruins, LABEL_SIZE_FILTER],
+    other: ['all', LOCATIONS_FILTER.other, LABEL_SIZE_FILTER],
 };
 
 export const LOCATIONS_MIN_ZOOM: LocationDict<ZoomLevel> = {
@@ -142,36 +200,61 @@ const POINT_CIRCLE_RADIUS: DataDrivenPropertyValueSpecification<number> = [
     4,
     LocationRadius.LG,
     5,
-    LocationRadius.XL,
+    LocationRadius.LG,
     LocationRadius.MD,
+];
+
+const POINT_SHADOW_RADIUS: DataDrivenPropertyValueSpecification<number> = [
+    'match',
+    ['get', 'size'],
+    1,
+    LocationRadius.SM + 2,
+    2,
+    LocationRadius.MD + 2,
+    3,
+    LocationRadius.MD + 2,
+    4,
+    LocationRadius.LG + 2,
+    5,
+    LocationRadius.LG + 2,
+    LocationRadius.MD + 2,
 ];
 
 export const POINTS_PAINT: CircleLayerSpecification['paint'] = {
     'circle-radius': POINT_CIRCLE_RADIUS,
-    'circle-color': [
-        'match',
-        ['get', 'type'],
-        'City',
-        LocationColor.City,
-        'Town',
-        LocationColor.Town,
-        'Castle',
-        LocationColor.Castle,
-        'Ruin',
-        LocationColor.Ruin,
-        'Other',
-        LocationColor.Other,
-        LocationColor.Other,
-    ],
+    'circle-color': WHITE,
     'circle-stroke-color': BLACK,
-    'circle-stroke-width': [
-        'case',
-        LOCATIONS_FILTER.cities,
-        2,
-        LOCATIONS_FILTER.greatCastles,
-        2,
-        1,
-    ],
+    'circle-stroke-width': 1,
+};
+
+export const POINTS_SHADOW: CircleLayerSpecification['paint'] = {
+    'circle-radius': POINT_SHADOW_RADIUS,
+    'circle-color': BLACK,
+    'circle-opacity': 0.3,
+    'circle-blur': 0.8,
+    'circle-translate': [1.5, 1.5],
+};
+
+const SYMBOL_MARKER_SIZE: DataDrivenPropertyValueSpecification<number> = [
+    'match',
+    ['get', 'size'],
+    1,
+    SymbolMarkerSize.SM,
+    SymbolMarkerSize.LG,
+];
+
+export const SYMBOL_MARKER_LAYOUT: SymbolLayerSpecification['layout'] = {
+    'text-field': '×',
+    'text-font': [FontStyle.Bold],
+    'text-size': SYMBOL_MARKER_SIZE,
+    'text-allow-overlap': true,
+    'text-ignore-placement': true,
+};
+
+export const SYMBOL_MARKER_PAINT: SymbolLayerSpecification['paint'] = {
+    'text-color': BLACK,
+    'text-halo-color': WHITE,
+    'text-halo-width': 1,
 };
 
 export const LABELS_MIN_ZOOM: GeodataDict<ZoomLevel> = {
@@ -241,16 +324,36 @@ export const LABEL_LAYOUT: Partial<GeodataDict<SymbolLayerSpecification['layout'
     locations: DEFAULT_POINT_LABEL_LAYOUT,
 };
 
+export const DEFAULT_LABEL_PAINT: SymbolLayerSpecification['paint'] = {
+    'text-halo-color': WHITE,
+    'text-halo-width': 1,
+};
+
 export const DEFAULT_LAND_LABEL_PAINT: SymbolLayerSpecification['paint'] = {
+    ...DEFAULT_LABEL_PAINT,
     'text-color': LabelColor.Land,
 };
 
 export const DEFAULT_WATER_LABEL_PAINT: SymbolLayerSpecification['paint'] = {
+    ...DEFAULT_LABEL_PAINT,
     'text-color': LabelColor.Water,
 };
 
 export const DEFAULT_POINT_LABEL_PAINT: SymbolLayerSpecification['paint'] = {
+    ...DEFAULT_LABEL_PAINT,
     'text-color': LabelColor.Location,
+};
+
+export const LABEL_PAINT: Partial<GeodataDict<SymbolLayerSpecification['paint']>> = {
+    mountains: { ...DEFAULT_LABEL_PAINT, 'text-color': LabelColor.Mountain },
+    forests: DEFAULT_LAND_LABEL_PAINT,
+    lakes: DEFAULT_WATER_LABEL_PAINT,
+    islands: DEFAULT_LAND_LABEL_PAINT,
+    kingdoms: { ...DEFAULT_LABEL_PAINT, 'text-color': LabelColor.Kingdom },
+    rivers: DEFAULT_WATER_LABEL_PAINT,
+    roads: { ...DEFAULT_LABEL_PAINT, 'text-color': LabelColor.Road },
+    wall: { ...DEFAULT_LABEL_PAINT, 'text-color': LabelColor.Wall },
+    locations: DEFAULT_POINT_LABEL_PAINT,
 };
 
 export const SEARCH_HIGHLIGHT_LINE_PAINT: LineLayerSpecification['paint'] = {
@@ -265,16 +368,4 @@ export const SEARCH_HIGHLIGHT_CIRCLE_PAINT: CircleLayerSpecification['paint'] = 
     'circle-stroke-color': RED,
     'circle-stroke-width': 10,
     'circle-stroke-opacity': 0.6,
-};
-
-export const LABEL_PAINT: Partial<GeodataDict<SymbolLayerSpecification['paint']>> = {
-    mountains: { 'text-color': LabelColor.Mountain },
-    forests: DEFAULT_LAND_LABEL_PAINT,
-    lakes: DEFAULT_WATER_LABEL_PAINT,
-    islands: DEFAULT_LAND_LABEL_PAINT,
-    kingdoms: { 'text-color': LabelColor.Kingdom },
-    rivers: DEFAULT_WATER_LABEL_PAINT,
-    roads: { 'text-color': LabelColor.Road },
-    wall: { 'text-color': LabelColor.Wall },
-    locations: DEFAULT_POINT_LABEL_PAINT,
 };

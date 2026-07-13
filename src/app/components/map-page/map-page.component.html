@@ -19,7 +19,7 @@
     aria-label="Reset map view"
     (click)="onHomeClick()"
 >
-    <mat-icon>home</mat-icon>
+    <mat-icon>{{ isZoomedOut() ? 'zoom_in_map' : 'zoom_out_map' }}</mat-icon>
 </button>
 
 <mgl-map
@@ -31,6 +31,7 @@
     [maxZoom]="9"
     [maxBounds]="maxBounds"
     [dragRotate]="false"
+    (zoomEvt)="onMapZoom($event)"
     (mapLoad)="onMapLoad($event)"
     (mapClick)="onMapClick($event)"
 >
@@ -46,6 +47,32 @@
             [paint]="polygonsPaint[polygonType]"
         />
     }
+
+    <mgl-layer
+        id="mountains-pattern"
+        type="fill"
+        source="mountains"
+        [paint]="polygonsPattern.mountains"
+        before="mountains-outline"
+    />
+
+    <mgl-layer
+        id="mountains-outline"
+        type="line"
+        source="mountains"
+        [layout]="mountainsOutlineLayout"
+        [paint]="mountainsOutlinePaint.outline"
+        before="mountains-edge-blur"
+    />
+
+    <mgl-layer
+        id="mountains-edge-blur"
+        type="line"
+        source="mountains"
+        [layout]="mountainsOutlineLayout"
+        [paint]="mountainsOutlinePaint.blur"
+        before="forests-fill"
+    />
 
     @for (lineType of lineTypes; track lineType) {
         <mgl-geojson-source
@@ -68,10 +95,19 @@
         id="wall-line"
         type="line"
         source="wall"
+        [layout]="linesLayout.wall"
         [paint]="linesPaint.wall"
         before="wall-label"
         (layerMouseEnter)="onFeatureEnter($event)"
         (layerMouseLeave)="onFeatureLeave()"
+    />
+    <mgl-layer
+        id="wall-shadow"
+        type="line"
+        source="wall"
+        [layout]="linesLayout.wall"
+        [paint]="linesShadow.wall"
+        before="wall-line"
     />
 
     @for (labeledType of labeledTypes; track labeledType) {
@@ -105,28 +141,52 @@
     />
 
     @for (type of locationTypes; track type) {
-        <mgl-layer
-            [id]="type + '-circle'"
-            type="circle"
-            source="locations"
-            [filter]="locationsFilter[type]"
-            [paint]="pointsPaint"
-            [minzoom]="locationsMinZoom[type] || 0"
-            (layerMouseEnter)="onFeatureEnter($event)"
-            (layerMouseLeave)="onFeatureLeave()"
-        />
-
-        @if (type !== 'other') {
+        @if (type === 'ruins') {
             <mgl-layer
-                [id]="type + '-label'"
+                [id]="type + '-mark'"
+                before="cities-label"
                 type="symbol"
                 source="locations"
                 [filter]="locationsFilter[type]"
+                [layout]="symbolMarkerLayout"
+                [paint]="symbolMarkerPaint"
                 [minzoom]="locationsMinZoom[type] || 0"
-                [layout]="labelLayout.locations"
-                [paint]="labelPaint.locations"
+                (layerMouseEnter)="onFeatureEnter($event)"
+                (layerMouseLeave)="onFeatureLeave()"
+            />
+        } @else {
+            <mgl-layer
+                [id]="type + '-mark'"
+                before="cities-label"
+                type="circle"
+                source="locations"
+                [filter]="locationsFilter[type]"
+                [paint]="pointsPaint"
+                [minzoom]="locationsMinZoom[type] || 0"
+                (layerMouseEnter)="onFeatureEnter($event)"
+                (layerMouseLeave)="onFeatureLeave()"
+            />
+
+            <mgl-layer
+                [id]="type + '-shadow'"
+                [before]="type + '-circle'"
+                type="circle"
+                source="locations"
+                [filter]="locationsFilter[type]"
+                [paint]="pointsShadow"
+                [minzoom]="locationsMinZoom[type] || 0"
             />
         }
+
+        <mgl-layer
+            [id]="type + '-label'"
+            type="symbol"
+            source="locations"
+            [filter]="locationLabelsFilter[type]"
+            [minzoom]="locationsMinZoom[type] || 0"
+            [layout]="labelLayout.locations"
+            [paint]="labelPaint.locations"
+        />
     }
 
     @let gradients = gradientCoordinates | keyvalue;
