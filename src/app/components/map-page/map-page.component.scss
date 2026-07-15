@@ -11,16 +11,21 @@
     height: 100%;
 }
 
-.about-button {
+.home-button, .about-button {
     position: absolute;
-    top: 16px;
     right: 16px;
     z-index: 1;
+    touch-action: pan-x pan-y;
+}
+
+.about-button {
+    bottom: 20px;
 }
 
 .home-button {
-    position: absolute;
-    bottom: 48px;
-    right: 16px;
-    z-index: 1;
+    bottom: 80px;
+}
+
+::ng-deep .maplibregl-ctrl-attrib {
+    display: none;
 }

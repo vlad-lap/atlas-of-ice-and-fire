@@ -17,6 +17,6 @@ export const EXTRA_LOCATIONS = [
     {
         type: 'Feature',
         properties: { name: 'Casterly Rock', size: 3, confirmed: 1, type: 'Castle' },
-        geometry: { type: 'Point', coordinates: [7.664877806220878, 5.621539966134607] },
+        geometry: { type: 'Point', coordinates: [7.305359863219508, 5.4727566272357535] },
     },
 ];
