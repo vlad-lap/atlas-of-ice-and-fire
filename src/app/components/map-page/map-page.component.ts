@@ -15,6 +15,7 @@ import {
     MapComponent,
 } from '@maplibre/ngx-maplibre-gl';
 import {
+    CircleLayerSpecification,
     LineLayerSpecification,
     LngLatBounds,
     LngLatLike,
@@ -95,13 +96,13 @@ import { KeyValuePipe } from '@angular/common';
     styleUrl: './map-page.component.scss',
 })
 export class MapPageComponent {
-    readonly map = viewChild.required(MapComponent);
+    protected readonly map = viewChild.required(MapComponent);
 
-    readonly isZoomedOut = signal<boolean>(false);
+    protected readonly isZoomedOut = signal<boolean>(false);
 
-    readonly searchHighlightFeature = signal<Feature>(null);
+    protected readonly searchHighlightFeature = signal<Feature>(null);
 
-    readonly searchHighlight = computed<FeatureCollection>(() => {
+    protected readonly searchHighlight = computed<FeatureCollection>(() => {
         const feature = this.searchHighlightFeature();
         return {
             type: 'FeatureCollection',
@@ -109,7 +110,7 @@ export class MapPageComponent {
         };
     });
 
-    readonly searchHighlightLayerType = computed<'line' | 'circle' | null>(() => {
+    protected readonly searchHighlightLayerType = computed<'line' | 'point' | null>(() => {
         const feature = this.searchHighlightFeature();
         return feature
             ? this.getHighlightLayerType(feature.geometry.type as HighlightableGeometry['type'])
@@ -190,8 +191,14 @@ export class MapPageComponent {
             visibility: this.searchHighlightLayerType() === 'line' ? 'visible' : 'none',
         }),
     );
+
+    protected readonly searchHighPointLayout = computed<CircleLayerSpecification['layout']>(
+        () => ({
+            visibility: this.searchHighlightLayerType() === 'point' ? 'visible' : 'none',
+        }),
+    );
     protected readonly searchHighlightLinePaint = SEARCH_HIGHLIGHT_LINE_PAINT;
-    protected readonly searchHighlightCirclePaint = SEARCH_HIGHLIGHT_CIRCLE_PAINT;
+    protected readonly searchHighlightPointPaint = SEARCH_HIGHLIGHT_CIRCLE_PAINT;
 
     private readonly hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     private popup: Popup;
@@ -301,8 +308,8 @@ export class MapPageComponent {
         return bounds;
     }
 
-    private getHighlightLayerType(geometryType: HighlightableGeometry['type']): 'line' | 'circle' {
-        return geometryType === 'Point' ? 'circle' : 'line';
+    private getHighlightLayerType(geometryType: HighlightableGeometry['type']): 'line' | 'point' {
+        return geometryType === 'Point' ? 'point' : 'line';
     }
 
     private hasTooltip({ properties, geometry }: Feature): boolean {

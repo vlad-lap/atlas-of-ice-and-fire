@@ -135,7 +135,7 @@
     @for (type of locationTypes; track type) {
         @if (type === 'ruins') {
             <mgl-layer
-                [id]="type + '-mark'"
+                [id]="type + '-point'"
                 before="cities-label"
                 type="symbol"
                 source="locations"
@@ -148,7 +148,7 @@
             />
         } @else {
             <mgl-layer
-                [id]="type + '-mark'"
+                [id]="type + '-point'"
                 before="cities-label"
                 type="circle"
                 source="locations"
@@ -161,7 +161,7 @@
 
             <mgl-layer
                 [id]="type + '-shadow'"
-                [before]="type + '-circle'"
+                [before]="type + '-point'"
                 type="circle"
                 source="locations"
                 [filter]="locationsFilter[type]"
@@ -205,16 +205,16 @@
         id="search-highlight-line"
         type="line"
         source="search-highlight"
-        before="cities-label"
+        before="rivers-line"
         [paint]="searchHighlightLinePaint"
         [layout]="searchHighlightLineLayout()"
     />
     <mgl-layer
-        id="search-highlight-circle"
+        id="search-highlight-point"
         type="circle"
         source="search-highlight"
         before="cities-label"
-        [paint]="searchHighlightCirclePaint"
-        [layout]="{ visibility: searchHighlightLayerType() === 'circle' ? 'visible' : 'none' }"
+        [paint]="searchHighlightPointPaint"
+        [layout]="searchHighPointLayout()"
     />
 </mgl-map>

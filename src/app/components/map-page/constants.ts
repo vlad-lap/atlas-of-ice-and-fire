@@ -17,9 +17,8 @@ export enum ZoomLevel {
 }
 
 export const BLACK = '#333333';
+export const GREY = '#6e6a63';
 export const WHITE = '#faf7ef';
-export const GREY = '#5d6d7e';
-export const ORANGE = '#ffa80d';
 export const RED = '#ff3b30';
 
 export enum LandscapeColor {
@@ -27,7 +26,7 @@ export enum LandscapeColor {
     Water = '#90d9ed',
     Forest = '#93cba2',
     Swamp = '#bae8d6',
-    Road = ORANGE,
+    Road = '#ffa80d',
     Wall = WHITE,
     KingdomBorder = GREY,
 }
@@ -58,12 +57,12 @@ export const TOUCH_HIT_RADIUS_PX = 15;
 export const MOUNTAIN_PATTERN_ID = 'mountain-pattern';
 
 export const TOOLTIP_LAYER_IDS = [
-    'cities-mark',
-    'towns-mark',
-    'greatCastles-mark',
-    'castles-mark',
-    'ruins-mark',
-    'other-mark',
+    'cities-point',
+    'towns-point',
+    'greatCastles-point',
+    'castles-point',
+    'ruins-point',
+    'other-point',
     'wall-line',
 ];
 
