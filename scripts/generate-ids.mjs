@@ -9,10 +9,12 @@ function generateHash(feature) {
 }
 
 function generateId(feature) {
-    const { name, type } = feature.properties;
-    const kebabType = _.kebabCase(type);
-    const kebabName = _.kebabCase(name);
-    return [kebabType, kebabName || generateHash(feature)].filter(Boolean).join('-');
+    const { name, type, continent } = feature.properties;
+    const idParts = name
+        ? [type, name].map(_.kebabCase)
+        : [...[type, continent].map(_.kebabCase), generateHash(feature)];
+
+    return idParts.filter(Boolean).join('-');
 }
 
 export function generateIds(data) {
