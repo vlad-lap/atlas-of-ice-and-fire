@@ -6,6 +6,7 @@ import {
     ViewContainerRef,
     viewChild,
     computed,
+    effect,
 } from '@angular/core';
 import { Store } from '@ngxs/store';
 import {
@@ -31,7 +32,7 @@ import { GEODATA_URLS } from '../../constants';
 import {
     INITIAL_MAP_CENTER,
     MOUNTAIN_PATTERN_ID,
-    TOOLTIP_LAYER_IDS,
+    SELECTABLE_LAYER_IDS,
     TOUCH_HIT_RADIUS_PX,
     ZoomLevel,
 } from './constants';
@@ -79,6 +80,8 @@ import { AboutDialogComponent } from '../about-dialog/about-dialog.component';
 import { TooltipComponent } from '../tooltip/tooltip.component';
 import { MapSearchComponent } from '../map-search/map-search.component';
 import { KeyValuePipe } from '@angular/common';
+import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
+import { CardComponent } from '../card/card.component';
 
 @Component({
     selector: 'cc-map-page',
@@ -99,6 +102,7 @@ import { KeyValuePipe } from '@angular/common';
 })
 export class MapPageComponent {
     protected readonly map = viewChild.required(MapComponent);
+    protected readonly searchComponent = viewChild.required(MapSearchComponent);
 
     protected readonly isZoomedOut = signal<boolean>(false);
 
@@ -114,12 +118,14 @@ export class MapPageComponent {
         };
     });
 
-    protected readonly searchHighlightLayerType = computed<'polygon' | 'line' | 'point' | null>(() => {
-        const feature = this.searchHighlightFeature();
-        return feature
-            ? this.getHighlightLayerType(feature.geometry.type as HighlightableGeometry['type'])
-            : null;
-    });
+    protected readonly searchHighlightLayerType = computed<'polygon' | 'line' | 'point' | null>(
+        () => {
+            const feature = this.searchHighlightFeature();
+            return feature
+                ? this.getHighlightLayerType(feature.geometry.type as HighlightableGeometry['type'])
+                : null;
+        },
+    );
 
     protected readonly dimOverlay = computed<FeatureCollection>(() => {
         const feature = this.searchHighlightFeature();
@@ -245,17 +251,33 @@ export class MapPageComponent {
     private readonly hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     private popup: Popup;
     private tooltipRef: ComponentRef<TooltipComponent>;
+    private bottomSheetRef: MatBottomSheetRef;
 
     constructor(
         private store: Store,
         private dialog: MatDialog,
+        private bottomSheet: MatBottomSheet,
         private viewContainerRef: ViewContainerRef,
-    ) {}
+    ) {
+        effect(() => {
+            const highlight = this.searchHighlightFeature();
+            if (highlight && this.hasCard(highlight)) {
+                this.openCard(highlight);
+            } else {
+                this.closeCard();
+            }
+        });
+    }
 
     async onMapLoad(map: Map): Promise<void> {
         map.touchZoomRotate.disableRotation();
         const { data } = await map.loadImage('hillshade.png');
         map.addImage(MOUNTAIN_PATTERN_ID, data);
+
+        const feature = this.searchHighlightFeature();
+        if (feature) {
+            this.zoomToFeature(feature);
+        }
     }
 
     onHomeClick(): void {
@@ -297,25 +319,20 @@ export class MapPageComponent {
         this.cursorStyle.set('default');
     }
 
-    onMapClick({ target, lngLat, point: { x, y } }: MapMouseEvent): void {
-        if (this.hasHover) {
-            return;
-        }
-
+    onMapClick({ target, point: { x, y } }: MapMouseEvent): void {
         const [feature] = target.queryRenderedFeatures(
             [
                 [x - TOUCH_HIT_RADIUS_PX, y - TOUCH_HIT_RADIUS_PX],
                 [x + TOUCH_HIT_RADIUS_PX, y + TOUCH_HIT_RADIUS_PX],
             ],
-            { layers: TOOLTIP_LAYER_IDS },
+            { layers: SELECTABLE_LAYER_IDS },
         );
 
         if (!feature?.properties?.name) {
-            this.onFeatureLeave();
             return;
         }
 
-        this.showTooltip(target, feature, lngLat);
+        this.searchComponent().setSelectedId(feature.properties.id);
     }
 
     search({ id }: FeatureData): void {
@@ -325,52 +342,69 @@ export class MapPageComponent {
         }
 
         this.searchHighlightFeature.set(feature);
-        const bounds = this.zoomToFeature(feature);
-
-        if (this.hasTooltip(feature)) {
-            this.showTooltip(
-                this.map().mapInstance,
-                feature as MapGeoJSONFeature,
-                bounds.getCenter(),
-            );
-        }
+        this.zoomToFeature(feature);
     }
 
     resetSearch(): void {
         this.searchHighlightFeature.set(null);
-        this.onFeatureLeave();
     }
 
     openAboutDialog(): void {
         this.dialog.open(AboutDialogComponent);
     }
 
-    private zoomToFeature({ geometry }: Feature): LngLatBounds {
+    private zoomToFeature({ geometry }: Feature): void {
+        const mapInstance = this.map().mapInstance;
+
+        if (!mapInstance) {
+            return;
+        }
+
         const bounds = getGeometryPositions(geometry as HighlightableGeometry).reduce(
             (initialBounds, position) => initialBounds.extend(position as LngLatLike),
             new LngLatBounds(),
         );
-        this.map().mapInstance.fitBounds(bounds, {
+        mapInstance.fitBounds(bounds, {
             maxZoom: ZoomLevel.High,
             padding: 60,
-            offset: [0, 0],
+            offset: [0, -25],
         });
-        return bounds;
     }
 
-    private getHighlightLayerType(geometryType: HighlightableGeometry['type']): 'polygon' | 'line' | 'point' {
+    private getHighlightLayerType(
+        geometryType: HighlightableGeometry['type'],
+    ): 'polygon' | 'line' | 'point' {
         const layerTypes = {
             Polygon: 'polygon',
             MultiPolygon: 'polygon',
             Line: 'line',
             MultiLine: 'line',
             Point: 'point',
-        }
+        };
         return layerTypes[geometryType];
     }
 
-    private hasTooltip({ properties, geometry }: Feature): boolean {
+    private hasCard({ properties, geometry }: Feature): boolean {
         return geometry.type === 'Point' || properties.id === 'the-wall';
+    }
+
+    private openCard({ properties }: Feature): void {
+        this.onFeatureLeave();
+
+        const bottomSheetRef = (this.bottomSheetRef = this.bottomSheet.open(CardComponent, {
+            hasBackdrop: false,
+            data: properties as LocationData,
+        }));
+
+        bottomSheetRef.afterDismissed().subscribe(() => {
+            if (this.bottomSheetRef === bottomSheetRef) {
+                this.searchComponent().setSelectedId(null);
+            }
+        });
+    }
+
+    private closeCard(): void {
+        this.bottomSheet.dismiss();
     }
 
     private showTooltip(
@@ -382,7 +416,11 @@ export class MapPageComponent {
 
         this.popup?.remove();
         this.tooltipRef?.destroy();
-        this.popup = new Popup({ closeButton: false, closeOnClick: false, className: 'cc-map-popup' })
+        this.popup = new Popup({
+            closeButton: false,
+            closeOnClick: false,
+            className: 'cc-map-popup',
+        })
             .setLngLat(anchor)
             .setDOMContent(this.buildTooltip(properties as LocationData))
             .addTo(map);

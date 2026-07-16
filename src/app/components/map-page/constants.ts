@@ -56,7 +56,7 @@ export const TOUCH_HIT_RADIUS_PX = 15;
 
 export const MOUNTAIN_PATTERN_ID = 'mountain-pattern';
 
-export const TOOLTIP_LAYER_IDS = [
+export const SELECTABLE_LAYER_IDS = [
     'cities-point',
     'towns-point',
     'greatCastles-point',

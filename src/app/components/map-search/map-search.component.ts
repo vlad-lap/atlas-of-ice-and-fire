@@ -20,13 +20,14 @@ import { GeodataState } from '../../store/geodata';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { map, Observable, startWith } from 'rxjs';
 import { FeatureData, GeodataType, LocationType } from '../../models';
-import { isEmpty, mapValues, omitBy } from 'lodash';
+import { flatten, isEmpty, mapValues, omitBy } from 'lodash';
 import { CommonModule, KeyValue } from '@angular/common';
 import { MatIconButton } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { SortByPipe } from '../../pipes';
 import { matchesSearch } from '../../utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 
 type OptionGroup = GeodataType | LocationType;
 
@@ -96,6 +97,8 @@ export class MapSearchComponent implements OnInit {
 
     constructor(
         private store: Store,
+        private router: Router,
+        private route: ActivatedRoute,
         private destroyRef: DestroyRef,
     ) {}
 
@@ -106,10 +109,23 @@ export class MapSearchComponent implements OnInit {
                 if (this.isFeatureData(value)) {
                     queueMicrotask(() => this.searchInput().nativeElement.blur());
                     this.applySearch.emit(value);
+                    this.setQueryParams(value);
                 } else if (!value) {
                     this.resetSearch.emit();
+                    this.setQueryParams(null);
                 }
             });
+
+        const { selected } = this.route.snapshot.queryParams;
+        if (selected) {
+            this.setSelectedId(selected);
+        }
+    }
+
+    setSelectedId(id: string): void {
+        const options = flatten(Object.values(this.options));
+        const selectedOption = options.find(option => option.id === id);
+        this.searchControl.patchValue(selectedOption);
     }
 
     reset(): void {
@@ -125,6 +141,13 @@ export class MapSearchComponent implements OnInit {
         { key: key2 }: KeyValue<OptionGroup, FeatureData[]>,
     ): number {
         return OPTIONS_GROUP_ORDER.indexOf(key1) - OPTIONS_GROUP_ORDER.indexOf(key2);
+    }
+
+    private setQueryParams(value: FeatureData): void {
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: value ? { selected: value.id } : {},
+        });
     }
 
     private matchesSearch({ searchKeys }: FeatureData): boolean {
