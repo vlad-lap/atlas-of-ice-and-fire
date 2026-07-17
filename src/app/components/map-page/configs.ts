@@ -188,7 +188,8 @@ export const LOCATIONS_FILTER: LocationDict<ExpressionSpecification> = {
     towns: ['==', ['get', 'type'], 'Town'],
     greatCastles: ['all', ['==', ['get', 'type'], 'Castle'], ['==', ['get', 'size'], 4]],
     castles: ['all', ['==', ['get', 'type'], 'Castle'], ['==', ['get', 'size'], 3]],
-    ruins: ['==', ['get', 'type'], 'Ruin'],
+    majorRuins: ['all', ['==', ['get', 'type'], 'Ruin'], ['==', ['get', 'size'], 2]],
+    ruins: ['all', ['==', ['get', 'type'], 'Ruin'], ['==', ['get', 'size'], 1]],
     other: ['==', ['get', 'type'], 'Other'],
 };
 
@@ -199,6 +200,7 @@ export const LOCATION_LABELS_FILTER: LocationDict<ExpressionSpecification> = {
     towns: ['all', LOCATIONS_FILTER.towns, LABEL_SIZE_FILTER],
     greatCastles: ['all', LOCATIONS_FILTER.greatCastles, LABEL_SIZE_FILTER],
     castles: ['all', LOCATIONS_FILTER.castles, LABEL_SIZE_FILTER],
+    majorRuins: ['all', LOCATIONS_FILTER.majorRuins, LABEL_SIZE_FILTER],
     ruins: ['all', LOCATIONS_FILTER.ruins, LABEL_SIZE_FILTER],
     other: ['all', LOCATIONS_FILTER.other, LABEL_SIZE_FILTER],
 };
@@ -206,6 +208,7 @@ export const LOCATION_LABELS_FILTER: LocationDict<ExpressionSpecification> = {
 export const LOCATIONS_MIN_ZOOM: LocationDict<ZoomLevel> = {
     towns: ZoomLevel.Medium,
     castles: ZoomLevel.Medium,
+    majorRuins: ZoomLevel.Medium,
     ruins: ZoomLevel.High,
     other: ZoomLevel.High,
 };
@@ -244,8 +247,22 @@ const POINT_SHADOW_RADIUS: DataDrivenPropertyValueSpecification<number> = [
 
 export const POINTS_PAINT: CircleLayerSpecification['paint'] = {
     'circle-radius': POINT_CIRCLE_RADIUS,
-    'circle-color': ['case', LOCATIONS_FILTER.ruins, LIGHT_GREY, WHITE],
-    'circle-stroke-color': ['case', LOCATIONS_FILTER.ruins, GREY, BLACK],
+    'circle-color': [
+        'case',
+        LOCATIONS_FILTER.majorRuins,
+        LIGHT_GREY,
+        LOCATIONS_FILTER.ruins,
+        LIGHT_GREY,
+        WHITE,
+    ],
+    'circle-stroke-color': [
+        'case',
+        LOCATIONS_FILTER.majorRuins,
+        GREY,
+        LOCATIONS_FILTER.ruins,
+        GREY,
+        BLACK,
+    ],
     'circle-stroke-width': 1,
 };
 
@@ -388,7 +405,14 @@ export const LABEL_PAINT: Partial<GeodataDict<SymbolLayerSpecification['paint']>
     wall: { ...DEFAULT_LABEL_PAINT, 'text-color': LabelColor.Wall },
     locations: {
         ...DEFAULT_LABEL_PAINT,
-        'text-color': ['case', LOCATIONS_FILTER.ruins, LabelColor.Ruin, LabelColor.Location],
+        'text-color': [
+            'case',
+            LOCATIONS_FILTER.majorRuins,
+            LabelColor.Ruin,
+            LOCATIONS_FILTER.ruins,
+            LabelColor.Ruin,
+            LabelColor.Location,
+        ],
     },
 };
 

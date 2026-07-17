@@ -58,6 +58,7 @@ export const SELECTABLE_LAYER_IDS = [
     'towns-point',
     'greatCastles-point',
     'castles-point',
+    'majorRuins-point',
     'ruins-point',
     'other-point',
     'wall-line',

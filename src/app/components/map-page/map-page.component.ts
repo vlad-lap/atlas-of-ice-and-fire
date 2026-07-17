@@ -206,6 +206,7 @@ export class MapPageComponent {
         'towns',
         'greatCastles',
         'castles',
+        'majorRuins',
         'ruins',
         'other',
     ];
