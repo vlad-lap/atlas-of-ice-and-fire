@@ -40,7 +40,7 @@ import {
     GeodataType,
     LineGeodataType,
     LocationData,
-    LocationType,
+    LocationTier,
     PolygonGeodataType,
 } from '../../models';
 import { GeodataState } from '../../store/geodata';
@@ -201,15 +201,7 @@ export class MapPageComponent {
     protected readonly pointsPaint = POINTS_PAINT;
     protected readonly pointsShadow = POINTS_SHADOW;
 
-    protected readonly locationTypes: LocationType[] = [
-        'cities',
-        'towns',
-        'greatCastles',
-        'castles',
-        'majorRuins',
-        'ruins',
-        'other',
-    ];
+    protected readonly locationTiers: LocationTier[] = ['primary', 'secondary', 'tertiary'];
     protected readonly locationsFilter = LOCATIONS_FILTER;
     protected readonly locationsMinZoom = LOCATIONS_MIN_ZOOM;
 

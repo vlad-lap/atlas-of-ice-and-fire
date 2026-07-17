@@ -13,6 +13,6 @@ export interface LocationData extends FeatureData {
     regionId?: string;
 }
 
-export type LocationType = 'cities' | 'towns' | 'greatCastles' | 'castles' | 'majorRuins' | 'ruins' | 'other';
-
-export type LocationDict<T> = Partial<Record<LocationType, T>>;
+export type LocationType = 'cities' | 'towns' | 'castles' | 'ruins' | 'other';
+export type LocationTier = 'primary' | 'secondary' | 'tertiary';
+export type LocationDict<T> = Partial<Record<LocationTier, T>>;

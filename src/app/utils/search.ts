@@ -1,5 +1,5 @@
 import { FeatureCollection } from 'geojson';
-import { FeatureData, LocationData, LocationDict, LocationType } from '../models';
+import { FeatureData, LocationData, LocationType } from '../models';
 import { groupBy, uniq, uniqBy } from 'lodash';
 
 const LOCATION_TYPES: Record<string, LocationType> = {
@@ -29,7 +29,7 @@ export function getSearchOptions({ features }: FeatureCollection): FeatureData[]
 
 export function getLocationsSearchOptions({
     features,
-}: FeatureCollection): LocationDict<LocationData[]> {
+}: FeatureCollection): Record<string, LocationData[]> {
     const locations: LocationData[] = features
         .filter(({ properties }) => !!properties?.name)
         .map(({ properties: { id, name, type } }) => ({

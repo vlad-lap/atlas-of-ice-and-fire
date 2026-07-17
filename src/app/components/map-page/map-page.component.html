@@ -157,35 +157,35 @@
         [data]="geodataUrls.locations"
     />
 
-    @for (type of locationTypes; track type) {
+    @for (tier of locationTiers; track tier) {
         <mgl-layer
-            [id]="type + '-point'"
-            before="cities-label"
+            [id]="tier + '-point'"
+            before="primary-point-label"
             type="circle"
             source="locations"
-            [filter]="locationsFilter[type]"
+            [filter]="locationsFilter[tier]"
             [paint]="pointsPaint"
-            [minzoom]="locationsMinZoom[type] || 0"
+            [minzoom]="locationsMinZoom[tier] || 0"
             (layerMouseEnter)="onFeatureEnter($event)"
             (layerMouseLeave)="onFeatureLeave()"
         />
 
         <mgl-layer
-            [id]="type + '-shadow'"
-            [before]="type + '-point'"
+            [id]="tier + '-point-shadow'"
+            [before]="tier + '-point'"
             type="circle"
             source="locations"
-            [filter]="locationsFilter[type]"
+            [filter]="locationsFilter[tier]"
             [paint]="pointsShadow"
-            [minzoom]="locationsMinZoom[type] || 0"
+            [minzoom]="locationsMinZoom[tier] || 0"
         />
 
         <mgl-layer
-            [id]="type + '-label'"
+            [id]="tier + '-point-label'"
             type="symbol"
             source="locations"
-            [filter]="locationLabelsFilter[type]"
-            [minzoom]="locationsMinZoom[type] || 0"
+            [filter]="locationLabelsFilter[tier]"
+            [minzoom]="locationsMinZoom[tier] || 0"
             [layout]="labelLayout.locations"
             [paint]="labelPaint.locations"
         />
@@ -243,7 +243,7 @@
         id="search-highlight-point"
         type="circle"
         source="search-highlight"
-        before="cities-point"
+        before="primary-point"
         [paint]="pointsPaint"
         [layout]="searchHighPointLayout()"
     />
