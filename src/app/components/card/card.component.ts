@@ -7,6 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { Subject } from 'rxjs';
 import { AreaPipe } from '../../pipes';
+import { APP_TITLE } from '../../constants';
 
 @Component({
     selector: 'cc-card',
@@ -32,7 +33,7 @@ export class CardComponent implements OnDestroy {
     async share(): Promise<void> {
         if (navigator.share) {
             await navigator.share({
-                title: this.data.name,
+                title: `${this.data.name} | ${APP_TITLE}`,
                 text: `${this.data.name} • ${this.data.type}`,
                 url: window.location.href,
             });

@@ -29,6 +29,7 @@ import { matchesSearch } from '../../utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { APP_TITLE } from '../../constants';
 
 type OptionGroup = GeodataType | LocationType;
 
@@ -159,8 +160,7 @@ export class MapSearchComponent implements OnInit {
     }
 
     private setTitle(value: FeatureData): void {
-        const appTitle = 'Compass of Crowns';
-        const title = value ? `${value.name} | ${appTitle}` : appTitle;
+        const title = value ? `${value.name} | ${APP_TITLE}` : APP_TITLE;
         this.title.setTitle(title);
     }
 
