@@ -122,13 +122,25 @@ const theWall = processGeoJSON('got_wall.geojson', {
 });
 
 const locations = readGeoJSON('got_locations.geojson');
+
+const getSize = feature => {
+    if (GREAT_CASTLES.includes(feature.properties.name)) {
+        return 4;
+    }
+
+    if (feature.properties.type === 'Town') {
+        return 3;
+    }
+
+    return feature.properties.size;
+}
+
 const locationsWithExtras = {
     ...locations,
     features: [...locations.features, ...EXTRA_LOCATIONS].map(feature => {
-        const isGreatCastle = GREAT_CASTLES.includes(feature.properties.name);
         const properties = {
             ...feature.properties,
-            size: isGreatCastle ? 4 : feature.properties.size,
+            size: getSize(feature),
             continentId: getLocationContinentId(feature, continents, islands),
             kingdomId: getContainingPolygonId(feature, kingdoms),
             regionId: getContainingPolygonId(feature, namedRegions),

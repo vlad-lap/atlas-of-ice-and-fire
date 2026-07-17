@@ -306,7 +306,7 @@ const DEFAULT_POINT_LABEL_LAYOUT: SymbolLayerSpecification['layout'] = {
         'case',
         LOCATIONS_FILTER.cities,
         ['literal', [FontStyle.Bold]],
-        LOCATIONS_FILTER.greatCastles,
+        LOCATIONS_FILTER.towns,
         ['literal', [FontStyle.Bold]],
         ['literal', [FontStyle.Regular]],
     ],
