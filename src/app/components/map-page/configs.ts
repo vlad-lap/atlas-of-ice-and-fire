@@ -100,7 +100,7 @@ export const POLYGONS_PAINT: GeodataDict<FillLayerSpecification['paint']> = {
     },
     deserts: {
         'fill-color': LandscapeColor.Desert,
-        'fill-opacity': 0.35,
+        'fill-opacity': 0.45,
     },
     swamps: {
         'fill-color': LandscapeColor.Swamp,
