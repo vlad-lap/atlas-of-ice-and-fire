@@ -1,8 +1,8 @@
-# Compass of Crowns
+# Compass of Ice and Fire
 
 ## Disclaimer
 
-Compass of Crowns is an unofficial, non-commercial fan project. It is not affiliated with or endorsed by George R. R. Martin, HBO, or any other rights holders.
+Compass of Ice and Fire is an unofficial, non-commercial fan project. It is not affiliated with or endorsed by George R. R. Martin, HBO, or any other rights holders.
 
 ## Data Attribution
 

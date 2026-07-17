@@ -7,7 +7,7 @@
     },
     "newProjectRoot": "projects",
     "projects": {
-        "compass-of-crowns": {
+        "compass-of-ice-and-fire": {
             "projectType": "application",
             "schematics": {
                 "@schematics/angular:component": {
@@ -75,10 +75,10 @@
                     "builder": "@angular/build:dev-server",
                     "configurations": {
                         "production": {
-                            "buildTarget": "compass-of-crowns:build:production"
+                            "buildTarget": "compass-of-ice-and-fire:build:production"
                         },
                         "development": {
-                            "buildTarget": "compass-of-crowns:build:development"
+                            "buildTarget": "compass-of-ice-and-fire:build:development"
                         }
                     },
                     "defaultConfiguration": "development"
