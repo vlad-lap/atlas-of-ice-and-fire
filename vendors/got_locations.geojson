@@ -187,7 +187,7 @@
 { "type": "Feature", "properties": { "id": 185, "name": "Eastwatch-by-the-Sea", "size": 3, "confirmed": 1, "type": "Castle" }, "geometry": { "type": "Point", "coordinates": [ 20.77037699161002, 34.756043911118184 ] } },
 { "type": "Feature", "properties": { "id": 186, "name": "Whitetree", "size": 1, "confirmed": 1, "type": "Other" }, "geometry": { "type": "Point", "coordinates": [ 18.167139305921964, 35.409001709027628 ] } },
 { "type": "Feature", "properties": { "id": 187, "name": "Craster's Keep", "size": 1, "confirmed": 1, "type": "Other" }, "geometry": { "type": "Point", "coordinates": [ 17.625157327563262, 36.296730811511715 ] } },
-{ "type": "Feature", "properties": { "id": 188, "name": "Fist of the First Men", "size": 1, "confirmed": 1, "type": "Other" }, "geometry": { "type": "Point", "coordinates": [ 16.24216883106174, 37.212493464600556 ] } },
+{ "type": "Feature", "properties": { "id": 188, "name": "Fist of the First Men", "size": 2, "confirmed": 1, "type": "Ruin" }, "geometry": { "type": "Point", "coordinates": [ 16.24216883106174, 37.212493464600556 ] } },
 { "type": "Feature", "properties": { "id": 189, "name": "Fishing Village", "size": 1, "confirmed": 0, "type": "Other" }, "geometry": { "type": "Point", "coordinates": [ 5.140882791576549, 24.48058923160513 ] } },
 { "type": "Feature", "properties": { "id": 190, "name": "Pennytree", "size": 1, "confirmed": 0, "type": "Other" }, "geometry": { "type": "Point", "coordinates": [ 15.513296515337961, 8.926640904397118 ] } },
 { "type": "Feature", "properties": { "id": 191, "name": "Lys", "size": 5, "confirmed": 1, "type": "City" }, "geometry": { "type": "Point", "coordinates": [ 31.5493001365449, -9.686785198240102 ] } },
