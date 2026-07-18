@@ -21,13 +21,12 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { map, Observable, startWith } from 'rxjs';
 import { FeatureData, GeodataType, LocationType } from '../../models';
 import { flatten, isEmpty, mapValues, omitBy } from 'lodash';
-import { CommonModule, KeyValue } from '@angular/common';
+import { CommonModule, KeyValue, Location } from '@angular/common';
 import { MatIconButton } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { SortByPipe } from '../../pipes';
 import { matchesSearch } from '../../utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { APP_TITLE } from '../../constants';
 
@@ -99,13 +98,17 @@ export class MapSearchComponent implements OnInit {
 
     constructor(
         private store: Store,
-        private router: Router,
-        private route: ActivatedRoute,
+        private location: Location,
         private destroyRef: DestroyRef,
         private title: Title,
     ) {}
 
     ngOnInit(): void {
+        const id = this.location.path().replace(/^\//, '');
+        if (id) {
+            this.setSelectedId(decodeURIComponent(id));
+        }
+
         this.searchControl.valueChanges
             .pipe(startWith(this.searchControl.value), takeUntilDestroyed(this.destroyRef))
             .subscribe(value => {
@@ -115,11 +118,6 @@ export class MapSearchComponent implements OnInit {
                     this.reset();
                 }
             });
-
-        const { selected } = this.route.snapshot.queryParams;
-        if (selected) {
-            this.setSelectedId(selected);
-        }
     }
 
     setSelectedId(id: string): void {
@@ -142,21 +140,18 @@ export class MapSearchComponent implements OnInit {
     private search(value: FeatureData): void {
         queueMicrotask(() => this.searchInput().nativeElement.blur());
         this.applySearch.emit(value);
-        this.setQueryParams(value);
+        this.setUrl(value);
         this.setTitle(value);
     }
 
     private reset(): void {
         this.resetSearch.emit();
-        this.setQueryParams(null);
+        this.setUrl(null);
         this.setTitle(null);
     }
 
-    private setQueryParams(value: FeatureData): void {
-        this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: value ? { selected: value.id } : {},
-        });
+    private setUrl(value: FeatureData): void {
+        this.location.go(value ? `/${encodeURIComponent(value.id)}` : '/');
     }
 
     private setTitle(value: FeatureData): void {

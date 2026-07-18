@@ -1,13 +1,24 @@
 import { Routes } from '@angular/router';
 import { mapResolver } from './resolvers';
 
+const loadMapPage = () =>
+    import('./components/map-page/map-page.component').then(m => m.MapPageComponent);
+
 export const routes: Routes = [
     {
         path: '',
-        loadComponent: () =>
-            import('./components/map-page/map-page.component').then(m => m.MapPageComponent),
         resolve: {
             data: mapResolver,
         },
+        children: [
+            {
+                path: '',
+                loadComponent: loadMapPage,
+            },
+            {
+                path: ':id',
+                loadComponent: loadMapPage,
+            },
+        ],
     },
 ];
