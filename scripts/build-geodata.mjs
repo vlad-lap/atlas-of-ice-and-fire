@@ -125,37 +125,20 @@ const theWall = processGeoJSON('got_wall.geojson', {
     }),
 });
 
-const locations = readGeoJSON('got_locations.geojson');
-
-const getSize = feature => {
-    if (GREAT_CASTLES.includes(feature.properties.name)) {
-        return 4;
-    }
-
-    if (feature.properties.type === 'Town') {
-        return 3;
-    }
-
-    return feature.properties.size;
-}
-
-const locationsWithExtras = {
-    ...locations,
-    features: [...locations.features, ...EXTRA_LOCATIONS].map(feature => {
-        const properties = {
+const locations = processGeoJSON('got_locations.geojson', {
+    mapFn: feature => ({
+        ...feature,
+        properties: {
             ...feature.properties,
-            size: getSize(feature),
+            size: feature.properties.size,
             continentId: getLocationContinentId(feature, continents, islands),
             kingdomId: getContainingPolygonId(feature, kingdoms),
             regionId: getContainingPolygonId(feature, namedRegions),
             islandId: getContainingPolygonId(feature, islands),
             description: descriptions[feature.properties.id] ?? null,
-        };
-        return { ...feature, properties };
+        },
     }),
-};
-
-writeGeoJSON('got_locations.geojson', locationsWithExtras);
+});
 
 mkdirSync(RAW_DATA, { recursive: true });
 
@@ -170,7 +153,7 @@ function writeRawDataJSON(fileName, dataItems) {
 const wallData = theWall.features.map(feature => feature.properties);
 writeRawDataJSON('the-wall.json', wallData);
 
-const locationsData = locationsWithExtras.features.map(feature => feature.properties);
+const locationsData = locations.features.map(feature => feature.properties);
 writeRawDataJSON('locations.json', locationsData);
 
 const descriptionsDict = [...wallData, ...locationsData]
