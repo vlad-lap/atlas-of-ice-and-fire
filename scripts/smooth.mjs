@@ -1,4 +1,4 @@
-function smoothRing(points, iterations = 2) {
+function smoothRing(points, iterations = 1) {
     let ring = points.slice(0, -1);
 
     for (let iteration = 0; iteration < iterations; iteration++) {

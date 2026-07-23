@@ -166,7 +166,7 @@ export class MapPageComponent {
         'islands',
         'steppes',
         'deserts',
-        'mountains',
+        // 'mountains',
         'swamps',
         'forests',
     ];
@@ -210,12 +210,11 @@ export class MapPageComponent {
     protected readonly locationsFilter = LOCATIONS_FILTER;
     protected readonly locationsMinZoom = LOCATIONS_MIN_ZOOM;
 
-    protected readonly labelLayout = computed<GeodataDict<SymbolLayerSpecification['layout']>>(
-        () =>
-            mapValues(LABEL_LAYOUT, layout => this.getLocalizedLabelLayout(layout)),
+    protected readonly labelLayout = computed<GeodataDict<SymbolLayerSpecification['layout']>>(() =>
+        mapValues(LABEL_LAYOUT, layout => this.getLocalizedLabelLayout(layout)),
     );
-    protected readonly defaultLabelLayout = computed<SymbolLayerSpecification['layout']>(
-        () => this.getLocalizedLabelLayout(DEFAULT_LABEL_LAYOUT)
+    protected readonly defaultLabelLayout = computed<SymbolLayerSpecification['layout']>(() =>
+        this.getLocalizedLabelLayout(DEFAULT_LABEL_LAYOUT),
     );
     protected readonly labelPaint = LABEL_PAINT;
     protected readonly labelsMinZoom = LABELS_MIN_ZOOM;
@@ -442,7 +441,9 @@ export class MapPageComponent {
         return this.tooltipRef.location.nativeElement;
     }
 
-    private getLocalizedLabelLayout(layout: SymbolLayerSpecification['layout']): SymbolLayerSpecification['layout'] {
+    private getLocalizedLabelLayout(
+        layout: SymbolLayerSpecification['layout'],
+    ): SymbolLayerSpecification['layout'] {
         const language = this.language();
         return {
             ...layout,

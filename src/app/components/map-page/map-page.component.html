@@ -53,6 +53,28 @@
         />
     }
 
+    <mgl-geojson-source
+        id="mountain-ridges"
+        data="geodata/got_mountain_ridges.geojson"
+    />
+    <mgl-layer
+        id="mountain-ridges-fill"
+        type="fill"
+        source="mountain-ridges"
+        before="forests-fill"
+        [paint]="{
+            'fill-color': [
+                'match',
+                ['get', 'shade'],
+                'light',
+                '#f6f0e7',
+                'dark',
+                '#e8e2d9',
+                'transparent'
+            ]
+        }"
+    />
+
     @for (lineType of lineTypes; track lineType) {
         <mgl-geojson-source
             [id]="lineType"
